@@ -1,18 +1,36 @@
 import * as THREE from "three";
 import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import { Center, Text3D } from "@react-three/drei";
+import { useFrame, useLoader  } from "@react-three/fiber";
+import { Text3D, useTexture } from "@react-three/drei";
+import ElderGodsBB from "/src/assets/fonts/ElderGods BB.json";
 
+useTexture.preload("/textures/earth/earth.jpg");
+useTexture.preload("/textures/mercury/mercuryColor.jpg");
+useTexture.preload("/textures/venus/venusColor.jpg");
 
 export default function Arcane() {
   const sphereRef1 = useRef();
   const sphereRef2 = useRef();
   const sphereRef3 = useRef();
-
+  const geometryRef = useRef();
+  const geometrySphere2 = useRef();
+  
   const progressRef = useRef(0); // ✅ Use ref for progress
   const startPositionSphereRef1 = new THREE.Vector3(0, 60.6, -200); // Starting point
   const endPositionSphereRef1 = new THREE.Vector3(-1.2, 1, 2); // Target point
   const endPositionSphereRef2 = new THREE.Vector3(1, 1, 2); // Target point
+
+  // 🔄 Rotate sphere on each frame
+  useFrame((state, delta) => {
+    if (geometryRef.current) {
+      geometryRef.current.rotateY(0.5 * delta); // Y-axis rotation (adjust speed if needed)
+      geometrySphere2.current.rotateY(0.5 * delta);
+    }
+  });
+
+  // Load textures only once to optimize performance
+  const mercury = useTexture("/textures/mercury/mercuryColor.jpg");
+  const venus = useTexture("/textures/venus/venusColor.jpg")
 
   // ✅ Pass your multi-line text here
     const textLinesSphere1 = [
@@ -59,25 +77,21 @@ export default function Arcane() {
         ref={sphereRef1}
         onClick={() => handleClick(sphereRef1)}
         onPointerOver={(e) => {
-            // Modify material properties on hover
-            sphereRef1.current.material.color.set("white"); // Change color
-            sphereRef1.current.material.emissive.set("red"); // Change emissive color
-            sphereRef1.current.material.emissiveIntensity = 10; // Increase emissive intensity
             sphereRef1.current.scale.multiplyScalar(0.95); // ✅ Scale down
           }}
           onPointerOut={(e) => {
-            // Reset properties when mouse leaves
-            sphereRef1.current.material.color.set("white");
-            sphereRef1.current.material.emissive.set("red");
-            sphereRef1.current.material.emissiveIntensity = 100;
             sphereRef1.current.scale.set(1, 1, 1); // Reset to original size
           }}
       >
-        <sphereGeometry args={[0.8, 32, 32]} />
+        <sphereGeometry  ref={geometryRef} args={[0.8, 32, 32]} />
         <meshStandardMaterial
-          color="white"
-          emissive={"red"}
-          emissiveIntensity={100}
+          map={mercury}
+          //map={asteroidTexture}
+          //aoMap={aoMap}
+          //normalMap={normalMap}
+          //roughnessMap={roughnessMap}
+          roughness={0.4}
+          metalness={0.3}
         />
         {/* ✅ Text3D added on Sphere 1 */}
         {/* ✅ Group for multiline text */}
@@ -85,7 +99,7 @@ export default function Arcane() {
         {textLinesSphere1.map((line, index) => (
           <Text3D
             key={index}
-            font="/fonts/helvetiker_regular.json"
+            font={ElderGodsBB}
             size={0.08}
             height={0.02}
             position={[-0.3, -index * 0.15, 0.2]} // Auto space each line
@@ -105,31 +119,23 @@ export default function Arcane() {
         onClick={() => handleClick(sphereRef2)}
         onPointerOver={(e) => {
           // Modify material properties on hover
-          sphereRef2.current.material.color.set("white"); // Change color
-          sphereRef2.current.material.emissive.set("green"); // Change emissive color
-          sphereRef2.current.material.emissiveIntensity = 10; // Increase emissive intensity
           sphereRef2.current.scale.multiplyScalar(0.95); // ✅ Scale down
         }}
         onPointerOut={(e) => {
           // Reset properties when mouse leaves
-          sphereRef2.current.material.color.set("white");
-          sphereRef2.current.material.emissive.set("green");
-          sphereRef2.current.material.emissiveIntensity = 100;
           sphereRef2.current.scale.set(1, 1, 1); // Reset to original size
         }}
       >
-        <sphereGeometry args={[0.8, 32, 32]} />
+        <sphereGeometry ref={geometrySphere2}  args={[0.8, 32, 32]} />
         <meshStandardMaterial
-          color="white"
-          emissive={"green"}
-          emissiveIntensity={100}
+          map={venus}
         />
         {/* ✅ Group for multiline text */}
       <group position={[-0.19, 0.05, 0.9]}>
         {textLinesSphere2.map((line, index) => (
           <Text3D
             key={index}
-            font="/fonts/helvetiker_regular.json"
+            font={ElderGodsBB}
             size={0.08}
             height={0.02}
             position={[-0.5, -index * 0.15, 0.2]} // Auto space each line

@@ -14,4 +14,15 @@ canvas {
   width: 100vw;
   height: 100vh;
 }
+/* Apply globally for HTML text if needed */
+body {
+  font-family: "ElderGodsBB", sans-serif;
+}
+
+@font-face {
+  font-family: "ElderGodsBB";
+  src: url("/fonts/ElderGodsBB.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
 
