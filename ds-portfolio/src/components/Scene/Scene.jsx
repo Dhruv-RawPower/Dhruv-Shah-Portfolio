@@ -1,16 +1,40 @@
-import SaintAnimationModel from "../SaintAnimationModel/SaintAnimationModel.jsx";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { EffectComposer, Bloom  } from "@react-three/postprocessing";
+import { Sky } from "@react-three/drei";
+import Terrain from "../Terrain/Terrain";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 
-export default function Scene() {
+
+const Scene = () => {
   return (
-    <div className="h-screen bg-gray-900 flex items-center justify-center">
-      <Canvas camera={{ position: [2, 2, 2] }}>
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[2, 2, 2]} intensity={1} />
-        <SaintAnimationModel />
-        <OrbitControls />
-      </Canvas>
-    </div>
+    <>
+      {/* Sky and Terrain */}
+  
+      <Terrain />
+      
+
+      {/* Post-processing Effects */}
+      <EffectComposer enableNormalPass>
+      
+
+      {/* ✨ Bloom for soft highlights */}
+      <Bloom
+        luminanceThreshold={0.2}
+        luminanceSmoothing={0.03}
+        intensity={0.5}
+      />
+
+
+      {/* 🎯 Use UnrealBloomPass properly */}
+      <primitive
+        object={new UnrealBloomPass(undefined, 0.5, 0.4, 0.85)}
+        attachArray="passes"
+      />
+    </EffectComposer>
+
+
+
+    </>
   );
-}
+};
+
+export default Scene;

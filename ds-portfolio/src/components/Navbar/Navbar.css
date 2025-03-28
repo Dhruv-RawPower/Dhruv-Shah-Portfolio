@@ -1,0 +1,58 @@
+.navClass {
+  display: flex;
+  gap: 1vw;
+  justify-content: center;
+  flex-wrap: wrap; 
+  border-radius: 8px;
+}
+
+  
+/*
+button {
+
+  padding: 0.7vw 1.5vw;
+  font-size: 1vw;
+  min-width: 120px; 
+  max-width: 200px; 
+  cursor: pointer;
+  border-radius: 5px;
+  background-color: rgb(255, 255, 255);
+  color: rgb(17, 17, 17);
+  border: none;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+*/
+/* Dungeon Style Button */
+.dungeon-btn {
+  font-family: 'MedievalSharp', cursive; /* Optional: use medieval-style fonts */
+  background: linear-gradient(145deg, #1e1e1e, #121212);
+  color: #ff4d00; /* Fiery glow effect */
+  padding: 0.8vw 2vw;
+  border: 3px solid #7a2e13; /* Rusty border */
+  border-radius: 8px;
+  font-size: 0.7vw;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(255, 77, 0, 0.4);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover Effect: Glow and Depth */
+.dungeon-btn:hover {
+  background: linear-gradient(145deg, #2a2a2a, #1c1c1c);
+  color: #ffa500; /* Brighter glow on hover */
+  border-color: #ff6a00;
+  box-shadow: 0 0 20px #ff6a00, 0 0 40px #ff4500;
+  transform: translateY(-3px); /* Slight lift on hover */
+}
+
+/* Active Effect: Pressed Button */
+.dungeon-btn:active {
+  background: #0f0f0f;
+  box-shadow: 0 2px 5px rgba(255, 77, 0, 0.2);
+  transform: translateY(2px);
+}
+
+
