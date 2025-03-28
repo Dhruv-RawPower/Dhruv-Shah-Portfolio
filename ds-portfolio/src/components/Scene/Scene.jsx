@@ -1,14 +1,12 @@
 import { EffectComposer, Bloom  } from "@react-three/postprocessing";
-import { Sky } from "@react-three/drei";
 import Terrain from "../Terrain/Terrain";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 
 
-const Scene = () => {
+const Scene = () => {    
   return (
     <>
       {/* Sky and Terrain */}
-  
       <Terrain />
       
 

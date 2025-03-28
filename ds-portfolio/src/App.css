@@ -17,6 +17,7 @@ canvas {
 /* Apply globally for HTML text if needed */
 body {
   font-family: "ElderGodsBB", sans-serif;
+  font-size:0.9vw;
 }
 
 @font-face {

@@ -13,6 +13,7 @@ const Navbar = () => {
   const [numLinksAnimation, setNumLinksAnimation] = useState(10);
   const [navbarPosition, setNavbarPosition] = useState([-5.5, 0.5, 0]);
   const [showMeteorite, setShowMeteorite] = useState(false);
+  const [navButton, setNavButton] = useState("");
 
   // Refs to avoid unnecessary re-renders
   const targetNumLinks = useRef(10);
@@ -66,17 +67,22 @@ const Navbar = () => {
     setAnimationCompleted(true);
   }, []);
 
-  const handleShowMeteorite = useCallback(() => {
-    setDisableButton(true);
-    setPlayAnimation((prev) => !prev);
-    setAnimationCompleted(false);
-    setShowMeteorite((prev) => !prev);
-    setTimeout(() => {
-      setShowMeteorite(true);
-      setDisableButton(false);
-    }
-    , 100);
-  }, [playAnimation]);
+  const handleShowMeteorite = useCallback(
+    (navButtonName) => {
+      setDisableButton(true);
+      setPlayAnimation((prev) => !prev);
+      setAnimationCompleted(false);
+      setShowMeteorite((prev) => !prev);
+      setNavButton(navButtonName);
+
+      setTimeout(() => {
+        setShowMeteorite(true);
+        setDisableButton(false);
+      }, 100);
+    },
+    [playAnimation] // ✅ Dependencies remain the same
+  );
+  
 
   return (
     <>
@@ -121,28 +127,34 @@ const Navbar = () => {
       >
         <h2
           style={{
-            fontSize: "1vw",
+            fontSize: "1.5vw",
             margin: "0 0 1vw 0",
-            color: "#fff",
+            color: "greenyellow",
           }}
         >
-          Dhruv Shah Portfolio
+          Dhruv Shah
         </h2>
         <div className="navClass">
-          <button onClick={handleShowMeteorite} className="dungeon-btn" disabled={disableButton}>
+          <button onClick={() => handleShowMeteorite("Home")} className="dungeon-btn" disabled={disableButton}>
+            Home
+          </button>
+          <button onClick={() => handleShowMeteorite("Projects")} className="dungeon-btn" disabled={disableButton}>
             Projects
           </button>
-          <button onClick={handleShowMeteorite} className="dungeon-btn" disabled={disableButton}>
+          <button onClick={() => handleShowMeteorite("About")} className="dungeon-btn" disabled={disableButton}>
             About
+          </button>
+          <button onClick={() => handleShowMeteorite("About")} className="dungeon-btn" disabled={disableButton}>
+            Contact
           </button>
         </div>
       </Html>
       
       {/* Memoized Meteorite to Avoid Unnecessary Renders */}
       <Suspense fallback={null}>
-        {useMemo(() => showMeteorite && <Arcane />, [showMeteorite])}
-      </Suspense>
-      
+        {useMemo(() => showMeteorite && <Arcane navButton={navButton}/>, [showMeteorite])}
+      </Suspense>    
+
       <SaintAnimationModel
         playAnimation={playAnimation}
         onAnimationComplete={handleAnimationComplete}
