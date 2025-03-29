@@ -95,7 +95,7 @@ export default function SaintAnimationModel({
         scale={1}
         rotation={[0, -0.5, 0]}
         position={[4, -0.5, 0.5]}
-        frustumCulled
+        
       />
 
       {/* 🔥 Optimized SpotLight */}
@@ -108,8 +108,8 @@ export default function SaintAnimationModel({
         castShadow
         color={"#ff5555"}
         power={spotLightPower}
-        shadow-mapSize-width={1024} // Reduce shadow map size
-        shadow-mapSize-height={1024} // Lowering resolution for optimization
+        shadow-mapSize-width={512} // Reduce shadow map size
+        shadow-mapSize-height={512} // Lowering resolution for optimization
         shadow-camera-near={0.5}
         shadow-camera-far={10}
         shadow-bias={-0.0005} // Fine-tune shadow quality
