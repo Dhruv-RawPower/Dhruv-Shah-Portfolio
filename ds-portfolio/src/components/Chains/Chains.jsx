@@ -1,8 +1,8 @@
 // Chains.jsx
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { OrbitControls, Environment } from '@react-three/drei';
-import * as THREE from 'three';
+import * as THREE from "three";
+
 
 // Create a hollow, rounded box shape for realistic chain links
 const createHollowShape = (size, thickness, radius) => {
@@ -35,49 +35,35 @@ const createHollowShape = (size, thickness, radius) => {
   return outerShape;
 };
 
-// Chain Link Component (with smooth snake animation)
-const ChainLink = ({ position, rotation, size, thickness, radius, depth, index, snakeAmplitude, snakeSpeed, snakeFrequency }) => {
+// Pre-compute geometry and material once
+const useChainGeometry = (size, thickness, radius, depth) => {
   const shape = useMemo(() => createHollowShape(size, thickness, radius), [size, thickness, radius]);
-  const extrudeSettings = {
-    depth,
-    bevelEnabled: true,
-    bevelSize: 0.02,
-    bevelThickness: 0.02,
-  };
-
-  // Ref for animation
-  const linkRef = useRef();
-
-  // Snake-like wave animation
-  useFrame(({ clock }) => {
-    const time = clock.getElapsedTime();
-    const waveOffset = index * snakeFrequency; // Creates a delay per link
-    const wavePosition = snakeAmplitude * Math.sin(time * snakeSpeed + waveOffset); // Snake wave
-
-    linkRef.current.position.x = wavePosition; // Wave along X-axis (like a snake)
-    linkRef.current.rotation.z = wavePosition * 0.05; // Small rotation for realistic sway
-  });
-
-  return (
-    <mesh
-      ref={linkRef}
-      position={position}
-      rotation={rotation}
-      castShadow
-      receiveShadow
-    >
-      <extrudeGeometry args={[shape, extrudeSettings]} />
-      <meshStandardMaterial
-        color={'#4c4c4c'}
-        metalness={0.95}
-        roughness={0.35}
-        envMapIntensity={1.2}
-      />
-    </mesh>
+  const extrudeSettings = useMemo(
+    () => ({
+      depth,
+      bevelEnabled: true,
+      bevelSize: 0.02,
+      bevelThickness: 0.02,
+    }),
+    [depth]
   );
+
+  const geometry = useMemo(() => new THREE.ExtrudeGeometry(shape, extrudeSettings), [shape, extrudeSettings]);
+  const material = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: "#4c4c4c",
+        metalness: 0.95,
+        roughness: 0.35,
+        envMapIntensity: 1.2,
+      }),
+    []
+  );
+
+  return { geometry, material };
 };
 
-// Main Chain Component with snake-like motion
+// Main Chain Component with Instancing for Better Performance
 const Chain = ({
   numLinks,
   linkSpacing,
@@ -90,35 +76,46 @@ const Chain = ({
   snakeSpeed,
   snakeFrequency,
 }) => {
-  const chainLinks = [];
+  const { geometry, material } = useChainGeometry(size, thickness, radius, depth);
+  const instancedRef = useRef();
 
-  for (let i = 0; i < numLinks; i++) {
-    const yOffset = -i * linkSpacing;
-    const linkPosition = [0, yOffset, 0];
+  // Precompute positions and rotations to avoid recalculating
+  const linkTransforms = useMemo(() => {
+    return Array.from({ length: numLinks }).map((_, i) => {
+      const yOffset = -i * linkSpacing;
+      const linkPosition = new THREE.Vector3(0, yOffset, 0);
+      const linkRotation = i % 2 === 0 ? new THREE.Euler(Math.PI / 2, Math.PI / 2, 0) : new THREE.Euler(Math.PI, 0, 0);
+      return { position: linkPosition, rotation: linkRotation };
+    });
+  }, [numLinks, linkSpacing]);
 
-    const rotation =
-      i % 2 === 0
-        ? [Math.PI / 2, Math.PI / 2, 0] // Vertical link
-        : [Math.PI, 0, 0]; // Horizontal link
+  // Snake-like wave animation using instancing
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
+    if (instancedRef.current) {
+      for (let i = 0; i < numLinks; i++) {
+        const { position, rotation } = linkTransforms[i];
+        const waveOffset = i * snakeFrequency; // Creates a delay per link
+        const wavePosition = snakeAmplitude * Math.sin(time * snakeSpeed + waveOffset);
 
-    chainLinks.push(
-      <ChainLink
-        key={i}
-        position={linkPosition}
-        rotation={rotation}
-        size={size}
-        thickness={thickness}
-        radius={radius}
-        depth={depth}
-        index={i}
-        snakeAmplitude={snakeAmplitude}
-        snakeSpeed={snakeSpeed}
-        snakeFrequency={snakeFrequency}
-      />
-    );
-  }
+        const matrix = new THREE.Matrix4();
+        matrix.compose(
+          new THREE.Vector3(wavePosition, position.y, position.z),
+          new THREE.Quaternion().setFromEuler(
+            new THREE.Euler(rotation.x, rotation.y, wavePosition * 0.05) // Add slight rotation for realism
+          ),
+          new THREE.Vector3(1, 1, 1)
+        );
 
-  return <group position={position}>{chainLinks}</group>;
+        instancedRef.current.setMatrixAt(i, matrix);
+      }
+      instancedRef.current.instanceMatrix.needsUpdate = true;
+    }
+  });
+
+  return (
+    <instancedMesh ref={instancedRef} args={[geometry, material, numLinks]} position={position} frustumCulled={true} castShadow receiveShadow />
+  );
 };
 
 // Main Chains Component with Snake Props
@@ -135,22 +132,18 @@ const Chains = ({
   snakeFrequency = 0.25, // Frequency of the wave per link
 }) => {
   return (
-    <>
-      {/* Chain with snake-like wave animation */}
-      <Chain
-        numLinks={numLinks}
-        linkSpacing={linkSpacing}
-        size={size}
-        thickness={thickness}
-        radius={radius}
-        depth={depth}
-        position={position}
-        snakeAmplitude={snakeAmplitude}
-        snakeSpeed={snakeSpeed}
-        snakeFrequency={snakeFrequency}
-      />
-
-    </>
+    <Chain
+      numLinks={numLinks}
+      linkSpacing={linkSpacing}
+      size={size}
+      thickness={thickness}
+      radius={radius}
+      depth={depth}
+      position={position}
+      snakeAmplitude={snakeAmplitude}
+      snakeSpeed={snakeSpeed}
+      snakeFrequency={snakeFrequency}
+    />
   );
 };
 

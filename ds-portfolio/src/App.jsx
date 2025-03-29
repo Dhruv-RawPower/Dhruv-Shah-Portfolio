@@ -1,56 +1,72 @@
 import { Canvas, extend } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import Navbar from "./components/Navbar/Navbar.jsx"
+import { OrbitControls, Html } from "@react-three/drei";
+import Navbar from "./components/Navbar/Navbar.jsx";
 import Scene from "./components/Scene/Scene.jsx";
-import Starfield from "./components/Starfield/Starfield.jsx"; 
-import { useTexture, useFont } from "@react-three/drei";
+import Starfield from "./components/Starfield/Starfield.jsx";
+import Preloader from "./components/Preloader/Preloader.jsx";
 import * as THREE from "three";
 import "./App.css";
 import { Physics } from "@react-three/rapier";
-import { Perf } from 'r3f-perf'
+import { Perf } from "r3f-perf";
+import { useState } from "react";
+import ErrorBoundary from "./components/Error Boundary/ErrorBoundary.jsx"
 
-
-useTexture.preload("/textures/mercury/mercuryColor.jpg");
-useTexture.preload("/textures/venus/venusColor.jpg");
-useTexture.preload("/textures/earth/earth.jpg");
-useTexture.preload("/textures/mars/marsColor.jpg")
-useFont.preload("/fonts/ElderGods BB.json");
-
-// Extend THREE.AxesHelper for JSX usage
 extend({ AxesHelper: THREE.AxesHelper });
 
 export default function App() {
+  const [assets, setAssets] = useState({
+    textures: null,
+    terrainTextures: null,
+    saintModel: null,
+    lowPolyTree: null,
+    elderGodsBB: null
+  });
+
   return (
-      <Canvas 
-              dpr={[1, 1.5]} // Limit pixel ratio
-              style={{ width: "100vw", height: "100vh" }}
-              gl={{ powerPreference: "high-performance", antialias: true }}
-              shadows
-              shadow-mapSize-width={1024}
-              shadow-mapSize-height={1024}
-              camera={{ position: [0, 1, 5], rotation: [0, 0, 0] }}
-             // onCreated={({ scene }) => {
-             //   scene.fog = new THREE.FogExp2("#5f5f5f", 0.07); // Smokey Gray Fog
-             // }}              
-              >
-           {/*    <fog attach="fog" color="hotpink" near={1} far={10} />*/}
-              <fogExp2 attach="fog" color="#DFE9F3" density={0.005} />
+    <Canvas
+      dpr={[1, 1.5]}
+      style={{ width: "100vw", height: "100vh" }}
+      gl={{ powerPreference: "high-performance", antialias: true }}
+      onCreated={({ gl }) => {
+        gl.debug.checkShaderErrors = true;
+      }}
+      shadows
+      camera={{ position: [0, 1, 5], rotation: [0, 0, 0] }}
+    >
+      {/* 🌌 Preload assets and pass data */}
+      <ErrorBoundary name="Preloader">
+        <Preloader setAssets={setAssets} />
+      </ErrorBoundary>
+      {/* Fog for environment */}
+      <fogExp2 attach="fog" color="#DFE9F3" density={0.005} />
+      <Perf position="top-left" />
 
+      {!assets.textures || !assets.terrainTextures || !assets.lowPolyTree || !assets.saintModel || !assets.elderGodsBB ? (
+        <Html>
+          <div style={{ color: "white", fontSize: "24px" }}>Loading assets...</div>
+        </Html>
+      ) : (
+        <>
+          <ambientLight color={"#D6DCE3"} intensity={0.4} />
+          {/* Night Sky Starfield */}
+          <ErrorBoundary name="Starfield">
+            <Starfield count={10000} />
+          </ErrorBoundary>
+          <Physics>
+            {/* Pass loaded assets to components */}
+            <ErrorBoundary name="Scene">
+              <Scene
+                terrainTextures={assets.terrainTextures}
+                lowPolyTree={assets.lowPolyTree}
+              />
+            </ErrorBoundary>
+            <ErrorBoundary name="Navbar">
+              <Navbar textures={assets.textures} saintModel={assets.saintModel} elderGodsBB={assets.elderGodsBB}/>
+            </ErrorBoundary>
+          </Physics>
+        </>
+      )}
+    </Canvas>
 
-        <Perf position="top-left" />
-              <ambientLight color={"#D6DCE3"} intensity={0.4} />
-              
-            {/*<OrbitControls />*/} 
-
-        {/* Night Sky Starfield */}
-        <Starfield count={10000} /> {/* Increase or decrease stars */}    
-        <Physics>
-          <Scene />
-          <Navbar />
-        </Physics>
-        
-        {/* Add AxesHelper with length 5 
-        <axesHelper args={[5]} />*/}
-      </Canvas>
   );
 }

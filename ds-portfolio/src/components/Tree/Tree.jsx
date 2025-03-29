@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
 
-const Tree = ({ position = [0, 0, 0], scale = [1, 1, 1], rotation = [0, 0, 0] }) => {
+  const Tree = ({ position = [0, 0, 0], scale = [1, 1, 1], rotation = [0, 0, 0],lowPolyTree }) => {
   // 🌳 Load the tree model
-  const { scene } = useGLTF("/models/lowPolyTree.gltf");
+  const { scene } = lowPolyTree;//useGLTF(`${import.meta.env.BASE_URL}/models/lowPolyTree.gltf`);
 
   // 🚀 Clone the model to prevent conflicts
   const clonedScene = useMemo(() => scene.clone(), [scene]);

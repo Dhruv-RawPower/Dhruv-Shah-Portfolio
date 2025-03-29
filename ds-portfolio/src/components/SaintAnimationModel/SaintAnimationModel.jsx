@@ -1,5 +1,4 @@
-import { useGLTF, useHelper } from "@react-three/drei";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { SpotLightHelper } from "three";
 import * as THREE from "three";
@@ -7,103 +6,113 @@ import * as THREE from "three";
 export default function SaintAnimationModel({
   playAnimation,
   onAnimationComplete,
+  saintModel,
 }) {
-  const { scene, animations } = useGLTF("/saintAnimated.gltf"); // Load the model
+  const { scene, animations } = saintModel;
   const [spotLightPower, setSpotLightPower] = useState(10);
-  const lightRef = useRef(); // Ref for the light
-  const modelRef = useRef(); // Ref for the model
-
-  // Attach helper to the light
-  //useHelper(lightRef, SpotLightHelper, "cyan");
-
-  // Enable shadows for all child objects
-  scene.traverse((child) => {
-    if (child.isMesh) {
-      child.castShadow = true;
-      child.receiveShadow = true;
-    }
-  });
-
+  const lightRef = useRef(); // Light ref
+  const modelRef = useRef(); // Model ref
   const mixerRef = useRef(null);
   const actionRef = useRef(null);
 
-  useEffect(() => {
+  // 🎥 Memoize animations and setup once
+  const setupAnimations = useMemo(() => {
     if (animations.length > 0) {
-      mixerRef.current = new THREE.AnimationMixer(scene);
+      const mixer = new THREE.AnimationMixer(scene);
+      const action = mixer.clipAction(animations[0]);
+      const waitAction = mixer.clipAction(animations[2]);
 
-      // Get the first animation
-      const action = mixerRef.current.clipAction(animations[0]);
-      // Get the last animation
-      const waitAction = mixerRef.current.clipAction(animations[2]);
-      actionRef.current = action;
+      // Configure action to play once and stop
+      action.clampWhenFinished = true;
+      action.setLoop(THREE.LoopOnce, 1);
 
-      // Play animation when playAnimation is true
+      return { mixer, action, waitAction };
+    }
+    return {};
+  }, [animations, scene]);
+
+  // 🧠 Attach animations once after load
+  useEffect(() => {
+    if (setupAnimations.mixer && setupAnimations.action) {
+      mixerRef.current = setupAnimations.mixer;
+      actionRef.current = setupAnimations.action;
+
+      // Detect when animation finishes
+      mixerRef.current.addEventListener("finished", () => {
+        console.log("Animation Completed!");
+        if (onAnimationComplete) {
+          onAnimationComplete();
+          setSpotLightPower(100);
+        }
+      });
+    }
+  }, [setupAnimations, onAnimationComplete]);
+
+  // 🎮 Play/Stop animation based on `playAnimation`
+  useEffect(() => {
+    if (mixerRef.current && actionRef.current) {
       if (playAnimation) {
         console.log("Playing Animation...");
-        waitAction.stop();
-        action.reset().play();
-
-        // Ensure it plays once and stops
-        action.clampWhenFinished = true;
-        action.setLoop(THREE.LoopOnce, 1);
+        setupAnimations.waitAction?.stop(); // Stop waiting action
+        actionRef.current.reset().play(); // Play the animation
         setSpotLightPower(1000);
-        // Detect when animation completes
-        mixerRef.current.addEventListener("finished", () => {
-          console.log("Animation Completed!");
-          if (onAnimationComplete) {
-            onAnimationComplete(); // Notify parent component (Navbar.jsx)
-            setSpotLightPower(100);
-          }
-        });
       } else {
-        action.stop();
-        actionRef.current = waitAction;
-        waitAction.play();
-        waitAction.reset().play();
         console.log("Stopping Animation...");
+        actionRef.current.stop();
+        setupAnimations.waitAction?.reset().play(); // Play waiting animation
         setSpotLightPower(100);
       }
     }
-  }, [playAnimation, animations, scene, onAnimationComplete]);
+  }, [playAnimation, setupAnimations]);
 
-  // Update animation on each frame
+  // 🕹️ Update animation on each frame
   useFrame((_, delta) => {
-    if (mixerRef.current) {
-      mixerRef.current.update(delta);
-    }
+    mixerRef.current?.update(delta);
 
-    // Update light target if model exists
+    // Optimize target update only when model exists
     if (lightRef.current && modelRef.current) {
-      lightRef.current.target.position.copy(
-        modelRef.current.position
-      ); // Point at model
+      lightRef.current.target.position.copy(modelRef.current.position);
       lightRef.current.target.updateMatrixWorld();
-      console.log("in saint ",playAnimation);
-      
     }
   });
 
+  // 🌟 Enable shadows for meshes only once after model loads
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }, [scene]);
+
   return (
     <>
-      {/* GLTF Model with ref to make it target */}
+      {/* 🧩 GLTF Model */}
       <primitive
         ref={modelRef}
         object={scene}
         scale={1}
         rotation={[0, -0.5, 0]}
         position={[4, -0.5, 0.5]}
+        frustumCulled
       />
 
-      {/* SpotLight with correct target */}
+      {/* 🔥 Optimized SpotLight */}
       <spotLight
         ref={lightRef}
-        position={[2, 3, 3]} // Slightly above and to the side
+        position={[2, 3, 3]}
         angle={0.3}
         penumbra={1.0}
         intensity={9.5}
         castShadow
         color={"#ff5555"}
         power={spotLightPower}
+        shadow-mapSize-width={1024} // Reduce shadow map size
+        shadow-mapSize-height={1024} // Lowering resolution for optimization
+        shadow-camera-near={0.5}
+        shadow-camera-far={10}
+        shadow-bias={-0.0005} // Fine-tune shadow quality
       />
     </>
   );

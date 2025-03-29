@@ -5,8 +5,10 @@ import SaintAnimationModel from "../SaintAnimationModel/SaintAnimationModel.jsx"
 import Chains from "../Chains/Chains.jsx";
 import Arcane from "../Arcane/Arcane.jsx";
 import "./Navbar.css";
+import ErrorBoundary from "../Error Boundary/ErrorBoundary.jsx"
 
-const Navbar = () => {
+
+const Navbar = ({textures, saintModel, elderGodsBB}) => {
   const [disableButton, setDisableButton] = useState(false);
   const [playAnimation, setPlayAnimation] = useState(false);
   const [animationCompleted, setAnimationCompleted] = useState(false);
@@ -151,14 +153,18 @@ const Navbar = () => {
       </Html>
       
       {/* Memoized Meteorite to Avoid Unnecessary Renders */}
+      <ErrorBoundary name="Arcane">
       <Suspense fallback={null}>
-        {useMemo(() => showMeteorite && <Arcane navButton={navButton}/>, [showMeteorite])}
+        {useMemo(() => showMeteorite && <Arcane navButton={navButton} textures={textures} elderGodsBB={elderGodsBB} />, [showMeteorite])}
       </Suspense>    
-
-      <SaintAnimationModel
-        playAnimation={playAnimation}
-        onAnimationComplete={handleAnimationComplete}
-      />
+      </ErrorBoundary>
+      <ErrorBoundary name="Saint animation">    
+        <SaintAnimationModel
+          playAnimation={playAnimation}
+          onAnimationComplete={handleAnimationComplete}
+          saintModel={saintModel}
+        />
+      </ErrorBoundary>
     </>
   );
 };

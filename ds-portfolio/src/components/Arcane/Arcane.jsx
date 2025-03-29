@@ -1,44 +1,35 @@
 import * as THREE from "three";
-import { Suspense, useRef } from "react";
-import { useFrame, useLoader } from "@react-three/fiber";
-import { Text3D, useTexture } from "@react-three/drei";
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Text } from "@react-three/drei";
 
-export default function Arcane({ navButton }) {
+export default function Arcane({ navButton, textures }) {
   // 🌌 Refs for spheres
   const mercuryRef = useRef();
   const venusRef = useRef();
   const earthRef = useRef();
   const marsRef = useRef();
 
-  const mercurySphereRef = useRef();
-  const venusSphereRef = useRef();
-  const earthSphereRef = useRef();
-  const marsSphereRef = useRef();
-
-  // 🛰️ Ref for animation progress
+  // 🛰️ Animation Progress Ref
   const progressRef = useRef(0);
-  const planetStartPositionRef = new THREE.Vector3(0, 60.6, -200); // Starting position
+  const planetStartPositionRef = new THREE.Vector3(0, 60.6, -200);
   const endPositionMercuryRef = new THREE.Vector3(-1.2, 1, 2);
   const endPositionVenusRef = new THREE.Vector3(1, 1, 2);
-
-  // ✅ Load textures correctly
-  const mercury = useTexture("/textures/mercury/mercuryColor.jpg");
-  const venus = useTexture("/textures/venus/venusColor.jpg");
-  const earth = useTexture("/textures/earth/earth.jpg");
-  const mars = useTexture("/textures/mars/marsColor.jpg");
 
   // 📚 Text content for spheres
   const textLinesSphere1 = ["SAAS Platform", "using Next JS", "for Modern Apps"];
   const textLinesSphere2 = ["Chat Application", "using Angular", "and Stomp JS"];
 
-  // 🎥 Rotate spheres and move them towards target
+  // 🎥 Rotate and animate spheres
   useFrame((state, delta) => {
-    [mercurySphereRef, venusSphereRef, earthSphereRef, marsSphereRef].forEach(
-      (ref) => {
-        if (ref.current) ref.current.rotateY(0.5 * delta);
-      }
-    );
+    const rotateSpeed = 0.5 * delta;
 
+    // ✅ Rotate spheres
+    [mercuryRef, venusRef, earthRef, marsRef].forEach((ref) => {
+      if (ref.current) ref.current.rotation.y += rotateSpeed;
+    });
+
+    // ✅ Move spheres towards target
     if (progressRef.current < 1) {
       progressRef.current = Math.min(progressRef.current + delta * 0.9, 1);
       mercuryRef.current?.position.lerpVectors(
@@ -71,55 +62,56 @@ export default function Arcane({ navButton }) {
       window.open("https://www.linkedin.com/in/dhruvshah09/", "_blank");
   };
 
-  // 📚 Helper to render multiline text
+  // 📚 Render Text as Flat 2D (OUTSIDE the sphere)
   const renderTextLines = (lines, position) => (
     <group position={position}>
       {lines.map((line, index) => (
-        <Suspense fallback={null} key={index}>
-          <Text3D
-            font={"/fonts/ElderGods BB.json"}
-            size={0.08}
-            height={0.02}
-            position={[-0.3, -index * 0.15, 0.2]}
-          >
-            {line}
-            <meshStandardMaterial
-              color="white"
-              emissive="white"
-              emissiveIntensity={0.5}
-            />
-          </Text3D>
-        </Suspense>
+        <Text
+          key={index}
+          fontSize={0.08}
+          position={[0, -index * 0.12, 0]}
+          color="white"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {line}
+        </Text>
       ))}
     </group>
   );
 
-  // 🌐 Render single sphere with optimized props
-  const renderSphere = (ref, sphereRef, texture, textLines, handleClick) => (
-    <mesh
-      ref={ref}
-      onClick={() => handleClick(ref)}
-      onPointerOver={() => ref.current.scale.set(0.95, 0.95, 0.95)}
-      onPointerOut={() => ref.current.scale.set(1, 1, 1)}
-    >
-      <sphereGeometry ref={sphereRef} args={[0.8, 16, 16]} />
-      <meshStandardMaterial map={texture} />
-      {renderTextLines(textLines, [0.268, 0.05, 0.9])}
-    </mesh>
+  // 🌐 Render spheres (Text is placed separately)
+  const renderSphere = (ref, texture, textLines, position) => (
+    <>
+      {/* Sphere Mesh */}
+      <mesh
+        ref={ref}
+        position={position}
+        onClick={() => handleClick(ref)}
+        onPointerOver={() => ref.current.scale.set(0.95, 0.95, 0.95)}
+        onPointerOut={() => ref.current.scale.set(1, 1, 1)}
+      >
+        <sphereGeometry args={[0.6, 16, 16]} /> {/* Reduced segment count */}
+        <meshStandardMaterial map={texture} />
+      </mesh>
+
+      {/* Static Text Above Sphere */}
+      {renderTextLines(textLines, [position[0], position[1] + 0.9, position[2]])}
+    </>
   );
 
   return (
     <>
       {/* 🔥 Projects Group */}
       <group visible={navButton === "Projects"}>
-        {renderSphere(mercuryRef, mercurySphereRef, mercury, textLinesSphere1, handleClick)}
-        {renderSphere(venusRef, venusSphereRef, venus, textLinesSphere2, handleClick)}
+        {renderSphere(mercuryRef, textures.mercury, textLinesSphere1, [-1, 1, 2])}
+        {renderSphere(venusRef, textures.venus, textLinesSphere2, [1, 1, 2])}
       </group>
 
       {/* 🌍 About Group */}
       <group visible={navButton === "About"}>
-        {renderSphere(earthRef, earthSphereRef, earth, textLinesSphere1, handleClick)}
-        {renderSphere(marsRef, marsSphereRef, mars, textLinesSphere2, handleClick)}
+        {renderSphere(earthRef, textures.earth, textLinesSphere1, [-1, 1, 2])}
+        {renderSphere(marsRef, textures.mars, textLinesSphere2, [1, 1, 2])}
       </group>
     </>
   );

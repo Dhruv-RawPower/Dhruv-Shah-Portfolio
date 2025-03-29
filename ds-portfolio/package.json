@@ -1,4 +1,5 @@
 {
+  "homepage": "https://Dhruv-RawPower.github.io/Dhruv-Shah-Portfolio",
   "name": "ds-portfolio",
   "private": true,
   "version": "0.0.0",
@@ -7,7 +8,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@react-three/drei": "^10.0.4",

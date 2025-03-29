@@ -1,14 +1,15 @@
 import { EffectComposer, Bloom  } from "@react-three/postprocessing";
 import Terrain from "../Terrain/Terrain";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
+import ErrorBoundary from "../Error Boundary/ErrorBoundary.jsx"
 
-
-const Scene = () => {    
+const Scene = ({terrainTextures, lowPolyTree}) => {    
   return (
     <>
       {/* Sky and Terrain */}
-      <Terrain />
-      
+      <ErrorBoundary name="Terrain">
+        <Terrain terrainTextures = {terrainTextures} lowPolyTree={lowPolyTree} />
+      </ErrorBoundary>
 
       {/* Post-processing Effects */}
       <EffectComposer enableNormalPass>

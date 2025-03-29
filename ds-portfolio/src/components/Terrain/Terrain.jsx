@@ -5,28 +5,13 @@ import { RigidBody } from "@react-three/rapier";
 import { useGLTF } from "@react-three/drei";
 import Tree from "../Tree/Tree";
 
-const Terrain = () => {
+const Terrain = ({terrainTextures , lowPolyTree}) => {
   // 🗻 Load height map and texture assets
-  const heightMap = useLoader(
-    THREE.TextureLoader,
-    "/textures/terrainHeightMap.png"
-  );
-  const terrainTexture = useLoader(
-    THREE.TextureLoader,
-    "/textures/terrainColor.jpg"
-  );
-  const normalMap = useLoader(
-    THREE.TextureLoader,
-    "/textures/terrainNormal.jpg"
-  );
-  const roughnessMap = useLoader(
-    THREE.TextureLoader,
-    "/textures/terrainRough.jpg"
-  );
-  const aoMap = useLoader(
-    THREE.TextureLoader,
-    "/textures/terrainAmbientOcclusion.jpg"
-  );
+  const heightMap = terrainTextures.terrainHeightMap;
+  const terrainTexture = terrainTextures.terrainColor;
+  const normalMap =terrainTextures.terrainNormal;
+  const roughnessMap = terrainTextures.terrainRough;
+  const aoMap = terrainTextures.terrainAmbientOcclusion;
 
   // 🌳 Define tree positions and scales
   const treePositions = useMemo(
@@ -64,10 +49,10 @@ const Terrain = () => {
           />
         </mesh>
       </RigidBody>
-
+     
       {/* 🌳 Render Trees */}
       {treePositions.map((pos, index) => (
-        <Tree key={index} position={pos} scale={[0.5, 0.5, 0.5]} />
+        <Tree key={index} position={pos} scale={[0.5, 0.5, 0.5]} lowPolyTree = {lowPolyTree} />
       ))}
     </>
   );
