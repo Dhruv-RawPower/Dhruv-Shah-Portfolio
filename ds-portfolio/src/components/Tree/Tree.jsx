@@ -1,26 +1,33 @@
 import React, { useMemo } from "react";
-import { useGLTF } from "@react-three/drei";
+import * as THREE from "three";
 
-  const Tree = ({ position = [0, 0, 0], scale = [1, 1, 1], rotation = [0, 0, 0],lowPolyTree }) => {
-  // 🌳 Load the tree model
-  const { scene } = lowPolyTree;//useGLTF(`${import.meta.env.BASE_URL}/models/lowPolyTree.gltf`);
+// 🌳 Optimized Tree with Single Clone for Trunk & Leaves
+const Tree = ({ position = [0, 0, 0], scale = [1, 1, 1], rotation = [0, 0, 0], lowPolyTree }) => {
+  // ✅ Clone tree once and reuse
+  const clonedTree = useMemo(() => {
+    if (!lowPolyTree || !lowPolyTree.scene) {
+      console.warn("⚠️ No valid tree model found!");
+      return null;
+    }
 
-  // 🚀 Clone the model to prevent conflicts
-  const clonedScene = useMemo(() => scene.clone(), [scene]);
+    // 🎯 Clone entire tree hierarchy
+    const clone = lowPolyTree.scene.clone(true);
 
-  // 📦 Optimize the tree for better performance
-  useMemo(() => {
-    clonedScene.traverse((child) => {
+    clone.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
       }
     });
-  }, [clonedScene]);
+
+    return clone;
+  }, [lowPolyTree]);
+
+  if (!clonedTree) return null;
 
   return (
     <primitive
-      object={clonedScene}
+      object={clonedTree}
       position={position}
       scale={scale}
       rotation={rotation}

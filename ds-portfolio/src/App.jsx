@@ -33,6 +33,7 @@ export default function App() {
       shadows
       camera={{ position: [0, 1, 5], rotation: [0, 0, 0] }}
     >
+      {/*<OrbitControls />*/}
       {/* 🌌 Preload assets and pass data */}
       <ErrorBoundary name="Preloader">
         <Preloader setAssets={setAssets} />

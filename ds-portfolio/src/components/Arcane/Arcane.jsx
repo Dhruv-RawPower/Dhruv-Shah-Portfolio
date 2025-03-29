@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Text } from "@react-three/drei";
+import { Text3D  } from "@react-three/drei";
 
 export default function Arcane({ navButton, textures }) {
   // 🌌 Refs for spheres
@@ -31,7 +31,9 @@ export default function Arcane({ navButton, textures }) {
 
     // ✅ Move spheres towards target
     if (progressRef.current < 1) {
-      progressRef.current = Math.min(progressRef.current + delta * 0.9, 1);
+   //   progressRef.current = Math.min(progressRef.current + delta * 0.9, 1);
+      progressRef.current = Math.min(progressRef.current + delta * 0.4, 1);
+
       mercuryRef.current?.position.lerpVectors(
         planetStartPositionRef,
         endPositionMercuryRef,
@@ -53,6 +55,7 @@ export default function Arcane({ navButton, textures }) {
         progressRef.current
       );
     }
+    if (progressRef.current >= 1) return;
   });
 
   // 🔗 Click event handler for navigation
@@ -63,21 +66,24 @@ export default function Arcane({ navButton, textures }) {
   };
 
   // 📚 Render Text as Flat 2D (OUTSIDE the sphere)
-  const renderTextLines = (lines, position) => (
-    <group position={position}>
-      {lines.map((line, index) => (
-        <Text
-          key={index}
-          fontSize={0.08}
-          position={[0, -index * 0.12, 0]}
-          color="white"
-          anchorX="center"
-          anchorY="middle"
-        >
-          {line}
-        </Text>
-      ))}
-    </group>
+  const renderTextLines = useMemo(
+    () => (lines, position) => (
+      <group position={position}>
+        {lines.map((line, index) => (
+          <Text3D
+            key={index}
+            font={`${import.meta.env.BASE_URL}fonts/ElderGods BB.json`}
+            size={0.08} // Corrected prop for Text3D
+            height={0.01} // Depth of text
+            curveSegments={4} // Lowered for better performance
+            position={[0, -index * 0.12, 0]}
+          >
+            {line}
+          </Text3D>
+        ))}
+      </group>
+    ),
+    []
   );
 
   // 🌐 Render spheres (Text is placed separately)

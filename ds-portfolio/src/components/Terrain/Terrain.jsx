@@ -1,19 +1,18 @@
-import * as THREE from "three";
-import  { useMemo } from "react";
-import { useLoader } from "@react-three/fiber";
+import React, { useMemo } from "react";
 import { RigidBody } from "@react-three/rapier";
-import { useGLTF } from "@react-three/drei";
 import Tree from "../Tree/Tree";
 
-const Terrain = ({terrainTextures , lowPolyTree}) => {
-  // 🗻 Load height map and texture assets
-  const heightMap = terrainTextures.terrainHeightMap;
-  const terrainTexture = terrainTextures.terrainColor;
-  const normalMap =terrainTextures.terrainNormal;
-  const roughnessMap = terrainTextures.terrainRough;
-  const aoMap = terrainTextures.terrainAmbientOcclusion;
+// 🌄 Optimized Terrain with Pre-Cloned Trees
+const Terrain = ({ terrainTextures, lowPolyTree }) => {
+  const {
+    terrainHeightMap: heightMap,
+    terrainColor: terrainTexture,
+    terrainNormal: normalMap,
+    terrainRough: roughnessMap,
+    terrainAmbientOcclusion: aoMap,
+  } = terrainTextures;
 
-  // 🌳 Define tree positions and scales
+  // 🌳 Predefined tree positions (Memoized)
   const treePositions = useMemo(
     () => [
       [5, 0, -5],
@@ -25,8 +24,14 @@ const Terrain = ({terrainTextures , lowPolyTree}) => {
     []
   );
 
+  // 📏 Adjust terrain resolution based on screen size
+  const terrainRes = useMemo(() => {
+    return window.innerWidth > 1200 ? 512 : 256;
+  }, []);
+
   return (
     <>
+      {/* 🌄 Optimized Terrain Mesh */}
       <RigidBody type="fixed" colliders="cuboid">
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
@@ -34,7 +39,7 @@ const Terrain = ({terrainTextures , lowPolyTree}) => {
           castShadow
           receiveShadow
         >
-          <planeGeometry args={[100, 50, 512, 512]} />
+          <planeGeometry args={[100, 50, terrainRes, terrainRes]} />
           <meshStandardMaterial
             map={terrainTexture}
             displacementMap={heightMap}
@@ -43,16 +48,20 @@ const Terrain = ({terrainTextures , lowPolyTree}) => {
             normalMap={normalMap}
             roughnessMap={roughnessMap}
             aoMap={aoMap}
-            roughness={9}
+            roughness={0.9}
             metalness={0.0}
-            aoMapIntensity={0.9}
           />
         </mesh>
       </RigidBody>
-     
-      {/* 🌳 Render Trees */}
+
+      {/* 🌳 Render Optimized Trees */}
       {treePositions.map((pos, index) => (
-        <Tree key={index} position={pos} scale={[0.5, 0.5, 0.5]} lowPolyTree = {lowPolyTree} />
+        <Tree
+          key={index}
+          position={pos}
+          scale={[0.5, 0.5, 0.5]}
+          lowPolyTree={lowPolyTree}
+        />
       ))}
     </>
   );
