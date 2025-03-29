@@ -40,7 +40,7 @@ export default function App() {
       </ErrorBoundary>
       {/* Fog for environment */}
       <fogExp2 attach="fog" color="#DFE9F3" density={0.005} />
-      <Perf position="top-left" />
+      {/*<Perf position="top-left" />*/}
 
       {!assets.textures || !assets.terrainTextures || !assets.lowPolyTree || !assets.saintModel || !assets.elderGodsBB ? (
         <Html>

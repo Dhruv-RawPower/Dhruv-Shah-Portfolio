@@ -3,7 +3,6 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import { useState, useRef, useEffect, useCallback, useMemo, Suspense } from "react";
 import SaintAnimationModel from "../SaintAnimationModel/SaintAnimationModel.jsx";
-import Chains from "../Chains/Chains.jsx";
 import Arcane from "../Arcane/Arcane.jsx";
 import "./Navbar.css";
 import ErrorBoundary from "../Error Boundary/ErrorBoundary.jsx";
@@ -14,6 +13,8 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
   const [animationCompleted, setAnimationCompleted] = useState(false);
   const [showMeteorite, setShowMeteorite] = useState(false);
   const [navButton, setNavButton] = useState("Home");
+  const [isPulled, setIsPulled] = useState(false);
+
 
   // 🎯 References for Animation & Position
   const numLinksAnimationRef = useRef(10);
@@ -31,12 +32,6 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
 
   // 🎥 Smooth Frame Update to Avoid Re-renders
   useFrame(() => {
-    // Smoothly update chain links animation
-    if (Math.abs(targetNumLinks.current - numLinksAnimationRef.current) > 0.1) {
-      numLinksAnimationRef.current +=
-        (targetNumLinks.current - numLinksAnimationRef.current) * lerpSpeed;
-    }
-
     // Smoothly interpolate Navbar position
     navbarPositionRef.current.lerpVectors(
       navbarPositionRef.current,
@@ -81,29 +76,6 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
     [playAnimation]
   );
 
-  // ⛓️ Memoized Chain Rendering
-  const memoizedChains = useMemo(
-    () => (
-      <>
-        <Chains
-          position={[-6.2, 4.5, 0]}
-          snakeAmplitude={-0.02}
-          snakeSpeed={3.0}
-          snakeFrequency={0.2}
-          numLinks={Math.round(numLinksAnimationRef.current)}
-        />
-        <Chains
-          position={[-4.9, 4.5, 0]}
-          snakeAmplitude={0.02}
-          snakeSpeed={3.0}
-          snakeFrequency={0.2}
-          numLinks={Math.round(numLinksAnimationRef.current)}
-        />
-      </>
-    ),
-    []
-  );
-
   // 📚 Memoized Navbar Buttons
   const memoizedNavbarButtons = useMemo(
     () => (
@@ -111,7 +83,7 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
         {["Home", "Projects", "About", "Contact"].map((btnName) => (
           <button
             key={btnName}
-            onClick={() => handleShowMeteorite(btnName)}
+            onClick={() => {handleShowMeteorite(btnName);setIsPulled(!isPulled);}}
             className="dungeon-btn"
             disabled={disableButton}
           >
@@ -125,9 +97,6 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
 
   return (
     <>
-      {/* ⛓️ Render Optimized Chains */}
-      {memoizedChains}
-
       {/* 🛸 Render Navbar (Optimized with useRef) */}
       <Html
         position={navbarPositionRef.current.toArray()} // ✅ Use Ref for Position

@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Text3D  } from "@react-three/drei";
+import { Html, Text3D } from "@react-three/drei";
 
 export default function Arcane({ navButton, textures }) {
   // 🌌 Refs for spheres
@@ -17,8 +17,10 @@ export default function Arcane({ navButton, textures }) {
   const endPositionVenusRef = new THREE.Vector3(1, 1, 2);
 
   // 📚 Text content for spheres
-  const textLinesSphere1 = ["SAAS Platform", "using Next JS", "for Modern Apps"];
   const textLinesSphere2 = ["Chat Application", "using Angular", "and Stomp JS"];
+
+  // 📡 State to track sphere rendering
+  const [spheresRendered, setSpheresRendered] = useState(false);
 
   // 🎥 Rotate and animate spheres
   useFrame((state, delta) => {
@@ -31,9 +33,7 @@ export default function Arcane({ navButton, textures }) {
 
     // ✅ Move spheres towards target
     if (progressRef.current < 1) {
-   //   progressRef.current = Math.min(progressRef.current + delta * 0.9, 1);
-      progressRef.current = Math.min(progressRef.current + delta * 0.4, 1);
-
+      progressRef.current = Math.min(progressRef.current + delta * 0.9, 1);
       mercuryRef.current?.position.lerpVectors(
         planetStartPositionRef,
         endPositionMercuryRef,
@@ -54,9 +54,27 @@ export default function Arcane({ navButton, textures }) {
         endPositionVenusRef,
         progressRef.current
       );
+
+      // ✅ Set flag after spheres finish animation
+      if (progressRef.current >= 1 && !spheresRendered) {
+        setSpheresRendered(true);
+      }
     }
-    if (progressRef.current >= 1) return;
   });
+
+  // 🌐 Render spheres (Text is placed separately after)
+  const renderSphere = (ref, texture, position) => (
+    <mesh
+      ref={ref}
+      position={position}
+      onClick={() => handleClick(ref)}
+      onPointerOver={() => ref.current.scale.set(0.95, 0.95, 0.95)}
+      onPointerOut={() => ref.current.scale.set(1, 1, 1)}
+    >
+      <sphereGeometry args={[0.6, 16, 16]} />
+      <meshStandardMaterial map={texture} />
+    </mesh>
+  );
 
   // 🔗 Click event handler for navigation
   const handleClick = (ref) => {
@@ -65,59 +83,107 @@ export default function Arcane({ navButton, textures }) {
       window.open("https://www.linkedin.com/in/dhruvshah09/", "_blank");
   };
 
-  // 📚 Render Text as Flat 2D (OUTSIDE the sphere)
-  const renderTextLines = useMemo(
-    () => (lines, position) => (
-      <group position={position}>
-        {lines.map((line, index) => (
-          <Text3D
-            key={index}
-            font={`${import.meta.env.BASE_URL}fonts/ElderGods BB.json`}
-            size={0.08} // Corrected prop for Text3D
-            height={0.01} // Depth of text
-            curveSegments={4} // Lowered for better performance
-            position={[0, -index * 0.12, 0]}
-          >
-            {line}
-          </Text3D>
-        ))}
-      </group>
-    ),
-    []
-  );
-
-  // 🌐 Render spheres (Text is placed separately)
-  const renderSphere = (ref, texture, textLines, position) => (
-    <>
-      {/* Sphere Mesh */}
-      <mesh
-        ref={ref}
-        position={position}
-        onClick={() => handleClick(ref)}
-        onPointerOver={() => ref.current.scale.set(0.95, 0.95, 0.95)}
-        onPointerOut={() => ref.current.scale.set(1, 1, 1)}
-      >
-        <sphereGeometry args={[0.6, 16, 16]} /> {/* Reduced segment count */}
-        <meshStandardMaterial map={texture} />
-      </mesh>
-
-      {/* Static Text Above Sphere */}
-      {renderTextLines(textLines, [position[0], position[1] + 0.9, position[2]])}
-    </>
-  );
-
   return (
     <>
       {/* 🔥 Projects Group */}
       <group visible={navButton === "Projects"}>
-        {renderSphere(mercuryRef, textures.mercury, textLinesSphere1, [-1, 1, 2])}
-        {renderSphere(venusRef, textures.venus, textLinesSphere2, [1, 1, 2])}
+        {renderSphere(mercuryRef, textures.mercury, [-1, 1, 2])}
+        {renderSphere(venusRef, textures.venus, [1, 1, 2])}
+
+        {spheresRendered && (
+          <Html position={[-4.2, -2.4, -5]} rotation={[0, 0, 0]} transform>
+            <div
+              style={{
+                width: "10vw",
+                maxWidth: "200px",
+                textAlign: "center",
+                padding: "1vw",
+                backgroundColor: "rgba(15, 15, 16, 0.6)",
+                border: "solid",
+                borderRadius: "10px",
+                borderColor: "rgba(165, 159, 141, 0.6)"
+              }}
+            >
+              <span
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "0.9vw", // Responsive font size
+                  //lineHeight: "1.5",
+                }}
+              >
+                🚀 SAAS Platform
+              </span>
+              <span
+                style={{
+                  fontSize: "0.9vw", // Changed 28px to 0.9vw
+                 // lineHeight: "1.5",
+                }}
+              >
+                ⚡ using Next JS
+              </span>
+              <span
+                style={{
+                  fontSize: "0.9vw", // Changed 28px to 0.9vw
+                 // lineHeight: "1.5",
+                }}
+              >
+                💡 for Modern Apps
+              </span>
+            </div>
+          </Html>
+        )}
       </group>
 
       {/* 🌍 About Group */}
       <group visible={navButton === "About"}>
-        {renderSphere(earthRef, textures.earth, textLinesSphere1, [-1, 1, 2])}
-        {renderSphere(marsRef, textures.mars, textLinesSphere2, [1, 1, 2])}
+        {renderSphere(earthRef, textures.earth, [-1, 1, 2])}
+        {renderSphere(marsRef, textures.mars, [1, 1, 2])}
+
+        {/* 🎉 Render Text AFTER Spheres are Loaded */}
+        {spheresRendered && (
+          <>
+            <Html position={[3.5, -2.4, -5]} rotation={[0, 0, 0]} transform > 
+            <div
+              style={{
+                width: "10vw",
+                maxWidth: "200px",
+                textAlign: "center",
+                padding: "1vw",
+                backgroundColor: "rgba(15, 15, 16, 0.6)",
+                border: "solid",
+                borderRadius: "10px",
+                borderColor: "rgba(165, 159, 141, 0.6)"
+              }}
+            >
+              <span
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "0.9vw", // Responsive font size
+                  //lineHeight: "1.5",
+                }}
+              >
+                🚀 Chat Application
+              </span>
+              <span
+                style={{
+                  fontSize: "0.9vw", // Changed 28px to 0.9vw
+                 // lineHeight: "1.5",
+                }}
+              >
+                ⚡ using Angular
+              </span>
+              <span
+                style={{
+                  fontSize: "0.9vw", // Changed 28px to 0.9vw
+                 // lineHeight: "1.5",
+                }}
+              >
+                💡 and Stomp JS
+              </span>
+            </div>
+          </Html>
+          </>
+        )}
       </group>
     </>
   );

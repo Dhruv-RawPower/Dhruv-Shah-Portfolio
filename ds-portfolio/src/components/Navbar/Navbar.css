@@ -7,21 +7,6 @@
 }
 
   
-/*
-button {
-
-  padding: 0.7vw 1.5vw;
-  font-size: 1vw;
-  min-width: 120px; 
-  max-width: 200px; 
-  cursor: pointer;
-  border-radius: 5px;
-  background-color: rgb(255, 255, 255);
-  color: rgb(17, 17, 17);
-  border: none;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-*/
 /* Dungeon Style Button */
 .dungeon-btn {
   /*font-family: 'MedievalSharp', cursive;  Optional: use medieval-style fonts */
