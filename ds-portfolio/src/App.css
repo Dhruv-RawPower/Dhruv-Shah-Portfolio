@@ -4,6 +4,8 @@
   margin: 0;
   padding: 0;
   overflow: hidden;
+  position: relative;
+  z-index: 0;
 }
 
 canvas {
@@ -13,11 +15,13 @@ canvas {
   left: 0;
   width: 100vw;
   height: 100vh;
+  pointer-events: none;
 }
+
 /* Apply globally for HTML text if needed */
 body {
   font-family: "ElderGodsBB", sans-serif;
-  font-size:0.9vw;
+  font-size: 14px;
 }
 
 @font-face {
@@ -26,4 +30,3 @@ body {
   font-weight: normal;
   font-style: normal;
 }
-

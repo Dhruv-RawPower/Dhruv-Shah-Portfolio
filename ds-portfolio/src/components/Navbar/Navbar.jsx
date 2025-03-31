@@ -15,7 +15,6 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
   const [navButton, setNavButton] = useState("Home");
   const [isPulled, setIsPulled] = useState(false);
 
-
   // 🎯 References for Animation & Position
   const numLinksAnimationRef = useRef(10);
   const targetNumLinks = useRef(10);
@@ -28,7 +27,7 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
 
   // ✅ Viewport Check for Mobile Layouts
   const { viewport } = useThree();
-  const isMobile = useMemo(() => viewport.width < 8, [viewport.width]);
+  const isMobile = useMemo(() => viewport.width < 12, [viewport.width]); // Increased threshold to handle high-res phones
 
   // 🎥 Smooth Frame Update to Avoid Re-renders
   useFrame(() => {
@@ -83,7 +82,10 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
         {["Home", "Projects", "About", "Contact"].map((btnName) => (
           <button
             key={btnName}
-            onClick={() => {handleShowMeteorite(btnName);setIsPulled(!isPulled);}}
+            onClick={() => {
+              handleShowMeteorite(btnName);
+              setIsPulled(!isPulled);
+            }}
             className="dungeon-btn"
             disabled={disableButton}
           >
@@ -99,25 +101,26 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
     <>
       {/* 🛸 Render Navbar (Optimized with useRef) */}
       <Html
-        position={navbarPositionRef.current.toArray()} // ✅ Use Ref for Position
+        position={navbarPositionRef.current.toArray()}
         rotation={[0, 0, 0]}
         transform
-        distanceFactor={isMobile ? 3 : 4.5}
+        distanceFactor={isMobile ? 5.5 : 7.5} // Increased distanceFactor to bring Navbar closer
         style={{
-          width: "10vw",
-          maxWidth: "200px",
+          width: isMobile ? "80vw" : "20vw",
+          maxWidth: "320px",
           textAlign: "center",
-          padding: "1vw",
-          backgroundColor: "rgba(15, 15, 16, 0.6)",
-          border: "solid",
+          padding: "1rem",
+          backgroundColor: "rgba(15, 15, 16, 0.8)",
+          border: "solid 1px rgba(165, 159, 141, 0.6)",
           borderRadius: "10px",
-          borderColor: "rgba(165, 159, 141, 0.6)",
+          boxSizing: "border-box",
+          zIndex: 20, // Ensure navbar is on top
         }}
       >
         <h2
           style={{
-            fontSize: "1.5vw",
-            margin: "0 0 1vw 0",
+            fontSize: isMobile ? "5vw" : "1.5vw",
+            margin: "0 0 1rem 0",
             color: "greenyellow",
           }}
         >

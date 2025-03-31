@@ -1,22 +1,21 @@
 .navClass {
   display: flex;
-  gap: 1vw;
+  gap: 12px;
   justify-content: center;
-  flex-wrap: wrap; 
-  border-radius: 8px;
+  flex-wrap: wrap;
+  max-width: 320px;
+  margin: 0 auto;
 }
 
-  
 /* Dungeon Style Button */
 .dungeon-btn {
-  /*font-family: 'MedievalSharp', cursive;  Optional: use medieval-style fonts */
   font-family: "ElderGodsBB", sans-serif;
   background: linear-gradient(145deg, #1e1e1e, #121212);
-  color: #ff4d00; /* Fiery glow effect */
-  padding: 0.8vw 2vw;
-  border: 3px solid #7a2e13; /* Rusty border */
+  color: #ff4d00;
+  padding: 12px 24px;
+  border: 3px solid #7a2e13;
   border-radius: 8px;
-  font-size: 0.9vw;
+  font-size: 16px;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -28,10 +27,10 @@
 /* Hover Effect: Glow and Depth */
 .dungeon-btn:hover {
   background: linear-gradient(145deg, #2a2a2a, #1c1c1c);
-  color: #ffa500; /* Brighter glow on hover */
+  color: #ffa500;
   border-color: #ff6a00;
   box-shadow: 0 0 20px #ff6a00, 0 0 40px #ff4500;
-  transform: translateY(-3px); /* Slight lift on hover */
+  transform: translateY(-3px);
 }
 
 /* Active Effect: Pressed Button */
@@ -41,4 +40,16 @@
   transform: translateY(2px);
 }
 
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .dungeon-btn {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
 
+  .navClass {
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+  }
+}
