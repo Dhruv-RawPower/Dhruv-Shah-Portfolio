@@ -1,5 +1,6 @@
 .navClass {
   display: flex;
+  flex-direction: column; 
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
@@ -12,10 +13,10 @@
   font-family: "ElderGodsBB", sans-serif;
   background: linear-gradient(145deg, #1e1e1e, #121212);
   color: #ff4d00;
-  padding: 12px 24px;
+  padding: 6px;
   border: 3px solid #7a2e13;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 0.8vw;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;

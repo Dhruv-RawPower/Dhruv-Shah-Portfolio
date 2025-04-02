@@ -29,6 +29,12 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
   const { viewport } = useThree();
   const isMobile = useMemo(() => viewport.width < 12, [viewport.width]); // Increased threshold to handle high-res phones
 
+  const getDistanceFactor = () => {
+    if (size.width <= 1280 && size.height <= 800) return 5; // Adjust for Nest Hub Max
+    return isPortrait ? (isMobile ? 10 : 8) : (isMobile ? 6 : 4.5);
+  };
+  
+
   // 🎥 Smooth Frame Update to Avoid Re-renders
   useFrame(() => {
     // Smoothly interpolate Navbar position
@@ -106,7 +112,7 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
         transform
         distanceFactor={isMobile ? 5.5 : 7.5} // Increased distanceFactor to bring Navbar closer
         style={{
-          width: isMobile ? "80vw" : "20vw",
+          width: isMobile ? "80vw" : "10vw",
           maxWidth: "320px",
           textAlign: "center",
           padding: "1rem",
