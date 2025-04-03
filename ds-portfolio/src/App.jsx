@@ -19,7 +19,8 @@ export default function App() {
     terrainTextures: null,
     saintModel: null,
     lowPolyTree: null,
-    elderGodsBB: null
+    elderGodsBB: null,
+    devImage: null,
   });
 
   const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
@@ -63,7 +64,7 @@ export default function App() {
         <fogExp2 attach="fog" color="#DFE9F3" density={0.005} />
         {/* <Perf position="top-left" /> */}
 
-        {!assets.textures || !assets.terrainTextures || !assets.lowPolyTree || !assets.saintModel || !assets.elderGodsBB ? (
+        {!assets.textures || !assets.terrainTextures || !assets.lowPolyTree || !assets.saintModel || !assets.elderGodsBB || !assets.devImage ? (
           <Html>
             <div style={{ color: "white", fontSize: "24px" }}>Loading assets...</div>
           </Html>
