@@ -1,158 +1,110 @@
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import { useState, useRef, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense, useMemo } from "react";
 import SaintAnimationModel from "../SaintAnimationModel/SaintAnimationModel.jsx";
 import Arcane from "../Arcane/Arcane.jsx";
 import "./Navbar.css";
 import ErrorBoundary from "../Error Boundary/ErrorBoundary.jsx";
+import Home from "../Home/Home.jsx";
 
 const Navbar = ({ textures, saintModel, elderGodsBB }) => {
+  const { camera, viewport } = useThree();
   const [disableButton, setDisableButton] = useState(false);
   const [playAnimation, setPlayAnimation] = useState(false);
-  const [animationCompleted, setAnimationCompleted] = useState(false);
   const [showMeteorite, setShowMeteorite] = useState(false);
   const [navButton, setNavButton] = useState("Home");
   const [isPulled, setIsPulled] = useState(false);
+  const navbarPositionRef = useRef(new THREE.Vector3());
 
-  // 🎯 References for Animation & Position
-  const numLinksAnimationRef = useRef(10);
-  const targetNumLinks = useRef(10);
-
-  const targetNavbarPosition = useRef(new THREE.Vector3(-5.5, 0.5, 0));
-  const navbarPositionRef = useRef(new THREE.Vector3(-5.5, 0.5, 0));
-
-  // 🚀 Lerp Speed for Smooth Transitions
-  const lerpSpeed = 0.08;
-
-  // ✅ Viewport Check for Mobile Layouts
-  const { viewport } = useThree();
-  const isMobile = useMemo(() => viewport.width < 12, [viewport.width]); // Increased threshold to handle high-res phones
-
-  const getDistanceFactor = () => {
-    if (size.width <= 1280 && size.height <= 800) return 5; // Adjust for Nest Hub Max
-    return isPortrait ? (isMobile ? 10 : 8) : (isMobile ? 6 : 4.5);
-  };
-  
-
-  // 🎥 Smooth Frame Update to Avoid Re-renders
-  useFrame(() => {
-    // Smoothly interpolate Navbar position
-    navbarPositionRef.current.lerpVectors(
-      navbarPositionRef.current,
-      targetNavbarPosition.current,
-      lerpSpeed
-    );
-  });
-
-  // 📚 Update Targets on Animation Change
+  // 📏 Calculate navbar position once per viewport change
   useEffect(() => {
-    targetNumLinks.current = playAnimation && !animationCompleted ? 5 : 10;
-    targetNavbarPosition.current.set(
-      playAnimation && !animationCompleted ? -5.5 : -5.5,
-      playAnimation && !animationCompleted ? 2.0 : 0.5,
+    const fovScale = Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
+    const aspectRatio = viewport.width / viewport.height;
+    navbarPositionRef.current.set(
+      -fovScale * aspectRatio * 0.7,
+      fovScale * 0.4,
       0
     );
-  }, [playAnimation, animationCompleted]);
+  }, [camera.fov, camera.position.z, viewport.width, viewport.height]);
 
-  // 🎥 Handle Animation Completion
-  const handleAnimationComplete = useCallback(() => {
-    setDisableButton(false);
-    setPlayAnimation(false);
-    setAnimationCompleted(true);
-  }, []);
+  const handleShowMeteorite = (navButtonName) => {
+    if (disableButton) return;
 
-  // 🛑 Prevent Rapid Button Clicks
-  const handleShowMeteorite = useCallback(
-    (navButtonName) => {
-      if (disableButton) return;
+    setDisableButton(true);
+    setPlayAnimation(true);
+    setShowMeteorite(false);
+    setNavButton(navButtonName);
 
-      setDisableButton(true);
-      setPlayAnimation((prev) => !prev);
-      setAnimationCompleted(false);
-      setShowMeteorite((prev) => !prev);
-      setNavButton(navButtonName);
+    setTimeout(() => {
+      setShowMeteorite(true);
+      setDisable 
+   
+Button(false);
+    }, 100);
+  };
 
-      setTimeout(() => {
-        setShowMeteorite(true);
-        setDisableButton(false);
-      }, 100);
-    },
-    [playAnimation]
-  );
-
-  // 📚 Memoized Navbar Buttons
-  const memoizedNavbarButtons = useMemo(
-    () => (
-      <div className="navClass">
-        {["Home", "Projects", "About", "Contact"].map((btnName) => (
-          <button
-            key={btnName}
-            onClick={() => {
-              handleShowMeteorite(btnName);
-              setIsPulled(!isPulled);
-            }}
-            className="dungeon-btn"
-            disabled={disableButton}
-          >
-            {btnName}
-          </button>
-        ))}
-      </div>
-    ),
-    [disableButton, handleShowMeteorite]
+  // Memoize button array to prevent re-renders
+  const navButtons = useMemo(() => 
+    ["Home", "Projects", "About", "Contact"].map((btnName) => (
+      <button
+        key={btnName}
+        onClick={() => {
+          handleShowMeteorite(btnName);
+          setIsPulled((prev) => !prev);
+        }}
+        className="dungeon-btn"
+        disabled={disableButton}
+      >
+        {btnName}
+      </button>
+    )),
+    [disableButton]
   );
 
   return (
     <>
-      {/* 🛸 Render Navbar (Optimized with useRef) */}
       <Html
         position={navbarPositionRef.current.toArray()}
-        rotation={[0, 0, 0]}
         transform
-        distanceFactor={isMobile ? 5.5 : 7.5} // Increased distanceFactor to bring Navbar closer
+        distanceFactor={Math.min(Math.max(camera.position.z / 3, 4.5), 7)}
         style={{
-          width: isMobile ? "80vw" : "10vw",
-          maxWidth: "320px",
+          width: `clamp(180px, ${viewport.width * 0.15}px, 280px)`,
           textAlign: "center",
-          padding: "1rem",
-          backgroundColor: "rgba(15, 15, 16, 0.8)",
-          border: "solid 1px rgba(165, 159, 141, 0.6)",
-          borderRadius: "10px",
-          boxSizing: "border-box",
-          zIndex: 20, // Ensure navbar is on top
+          padding: "1.2rem",
+          backgroundColor: "rgba(15, 15, 16, 0.85)",
+          border: "solid 1px rgba(165, 159, 141, 0.7)",
+          borderRadius: "12px",
+          zIndex: 20,
         }}
       >
-        <h2
-          style={{
-            fontSize: isMobile ? "5vw" : "1.5vw",
-            margin: "0 0 1rem 0",
-            color: "greenyellow",
-          }}
-        >
+        <h2 style={{ fontSize: "2vw", color: "greenyellow", textTransform: "uppercase" }}>
           Dhruv Shah
         </h2>
-        {memoizedNavbarButtons}
+        <div className="navClass">{navButtons}</div>
       </Html>
 
-      {/* 🌠 Render Meteorite */}
       <ErrorBoundary name="Arcane">
         <Suspense fallback={null}>
           {showMeteorite && (
-            <Arcane
-              navButton={navButton}
-              textures={textures}
-              elderGodsBB={elderGodsBB}
-            />
+            <Arcane navButton={navButton} textures={textures} elderGodsBB={elderGodsBB} />
           )}
         </Suspense>
       </ErrorBoundary>
 
-      {/* ✨ Render Saint Animation */}
+      <ErrorBoundary name="Home">
+        <Suspense fallback={null}>
+          <Home visible={navButton === "Home"} />
+        </Suspense>
+      </ErrorBoundary>
+
       <ErrorBoundary name="Saint animation">
         <SaintAnimationModel
           playAnimation={playAnimation}
-          onAnimationComplete={handleAnimationComplete}
+          onAnimationComplete={() => {
+            setDisableButton(false);
+            setPlayAnimation(false);
+          }}
           saintModel={saintModel}
         />
       </ErrorBoundary>

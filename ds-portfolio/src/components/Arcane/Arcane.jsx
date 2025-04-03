@@ -1,190 +1,108 @@
 import * as THREE from "three";
-import { useRef, useMemo, useState, useEffect } from "react";
+import { useRef, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Html, Text3D } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 
 export default function Arcane({ navButton, textures }) {
-  // 🌌 Refs for spheres
-  const mercuryRef = useRef();
-  const venusRef = useRef();
-  const earthRef = useRef();
-  const marsRef = useRef();
+  // 🔗 References for spheres
+  const sphereRefs = {
+    mercury: useRef(),
+    venus: useRef(),
+    earth: useRef(),
+    mars: useRef(),
+  };
 
-  // 🛰️ Animation Progress Ref
+  // 🎥 Animation Progress Ref
   const progressRef = useRef(0);
-  const planetStartPositionRef = new THREE.Vector3(0, 60.6, -200);
-  const endPositionMercuryRef = new THREE.Vector3(-1.2, 1, 2);
-  const endPositionVenusRef = new THREE.Vector3(1, 1, 2);
-
-  // 📚 Text content for spheres
-  const textLinesSphere2 = ["Chat Application", "using Angular", "and Stomp JS"];
-
-  // 📡 State to track sphere rendering
   const [spheresRendered, setSpheresRendered] = useState(false);
 
-  // 🎥 Rotate and animate spheres
-  useFrame((state, delta) => {
-    const rotateSpeed = 0.5 * delta;
+  // 🪐 Initial & Final Positions
+  const startPos = new THREE.Vector3(0, 60.6, -200);
+  const endPositions = {
+    mercury: new THREE.Vector3(-1.2, 1, 2),
+    venus: new THREE.Vector3(1, 1, 2),
+    earth: new THREE.Vector3(-1, 1, 2),
+    mars: new THREE.Vector3(1, 1, 2),
+  };
 
-    // ✅ Rotate spheres
-    [mercuryRef, venusRef, earthRef, marsRef].forEach((ref) => {
+  // 🌌 Animate spheres smoothly
+  useFrame((_, delta) => {
+    const rotateSpeed = 0.5 * delta;
+    Object.values(sphereRefs).forEach((ref) => {
       if (ref.current) ref.current.rotation.y += rotateSpeed;
     });
 
-    // ✅ Move spheres towards target
     if (progressRef.current < 1) {
       progressRef.current = Math.min(progressRef.current + delta * 0.9, 1);
-      mercuryRef.current?.position.lerpVectors(
-        planetStartPositionRef,
-        endPositionMercuryRef,
-        progressRef.current
-      );
-      venusRef.current?.position.lerpVectors(
-        planetStartPositionRef,
-        endPositionVenusRef,
-        progressRef.current
-      );
-      earthRef.current?.position.lerpVectors(
-        planetStartPositionRef,
-        endPositionMercuryRef,
-        progressRef.current
-      );
-      marsRef.current?.position.lerpVectors(
-        planetStartPositionRef,
-        endPositionVenusRef,
-        progressRef.current
-      );
+      Object.entries(sphereRefs).forEach(([key, ref]) => {
+        if (ref.current) {
+          ref.current.position.lerpVectors(startPos, endPositions[key], progressRef.current);
+        }
+      });
 
-      // ✅ Set flag after spheres finish animation
       if (progressRef.current >= 1 && !spheresRendered) {
         setSpheresRendered(true);
       }
     }
   });
 
-  // 🌐 Render spheres (Text is placed separately after)
-  const renderSphere = (ref, texture, position) => (
-    <mesh
-      ref={ref}
-      position={position}
-      onClick={() => handleClick(ref)}
-      onPointerOver={() => ref.current.scale.set(0.95, 0.95, 0.95)}
-      onPointerOut={() => ref.current.scale.set(1, 1, 1)}
-    >
-      <sphereGeometry args={[0.6, 16, 16]} />
-      <meshStandardMaterial map={texture} />
-    </mesh>
+  // ✨ Memoized Sphere Rendering (Prevents Re-renders)
+  const renderSphere = useMemo(
+    () => (name, texture, onClick) => (
+      <mesh ref={sphereRefs[name]} position={endPositions[name]} onClick={onClick}>
+        <sphereGeometry args={[0.6, 16, 16]} />
+        <meshStandardMaterial map={texture} />
+      </mesh>
+    ),
+    [textures]
   );
 
-  // 🔗 Click event handler for navigation
-  const handleClick = (ref) => {
-    if (ref === mercuryRef) window.open("https://www.youtube.com/", "_blank");
-    else if (ref === venusRef)
-      window.open("https://www.linkedin.com/in/dhruvshah09/", "_blank");
-  };
+  // 📌 Memoized HTML Info Box
+  const renderHtmlBox = useMemo(
+    () => (position, title, line1, line2) =>
+      spheresRendered && (
+        <Html position={position} transform>
+          <div className="info-box">
+            <span className="title">{title}</span>
+            <span className="desc">{line1}</span>
+            <span className="desc">{line2}</span>
+          </div>
+        </Html>
+      ),
+    [spheresRendered]
+  );
 
   return (
     <>
-      {/* 🔥 Projects Group */}
-      <group visible={navButton === "Projects"}>
-        {renderSphere(mercuryRef, textures.mercury, [-1, 1, 2])}
-        {renderSphere(venusRef, textures.venus, [1, 1, 2])}
-
-        {spheresRendered && (
-          <Html position={[-4.2, -2.4, -5]} rotation={[0, 0, 0]} transform>
-            <div
-              style={{
-                width: "10vw",
-                maxWidth: "200px",
-                textAlign: "center",
-                padding: "1vw",
-                backgroundColor: "rgba(15, 15, 16, 0.6)",
-                border: "solid",
-                borderRadius: "10px",
-                borderColor: "rgba(165, 159, 141, 0.6)"
-              }}
-            >
-              <span
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "0.9vw", // Responsive font size
-                  //lineHeight: "1.5",
-                }}
-              >
-                🚀 SAAS Platform
-              </span>
-              <span
-                style={{
-                  fontSize: "0.9vw", // Changed 28px to 0.9vw
-                 // lineHeight: "1.5",
-                }}
-              >
-                ⚡ using Next JS
-              </span>
-              <span
-                style={{
-                  fontSize: "0.9vw", // Changed 28px to 0.9vw
-                 // lineHeight: "1.5",
-                }}
-              >
-                💡 for Modern Apps
-              </span>
-            </div>
-          </Html>
-        )}
-      </group>
+      {/* 🚀 Projects Group */}
+      {navButton === "Projects" && (
+        <group>
+          {renderSphere("mercury", textures.mercury, () => window.open("https://www.youtube.com/", "_blank"))}
+          {renderSphere("venus", textures.venus, () => window.open("https://www.linkedin.com/in/dhruvshah09/", "_blank"))}
+          {renderHtmlBox([-4.2, -2.4, -5], "🚀 SAAS Platform", "⚡ using Next JS", "💡 for Modern Apps")}
+          {renderHtmlBox([3.5, -2.4, -5], "🚀 Chat Application", "⚡ using Angular", "💡 and Stomp JS")}
+        </group>
+      )}
 
       {/* 🌍 About Group */}
-      <group visible={navButton === "About"}>
-        {renderSphere(earthRef, textures.earth, [-1, 1, 2])}
-        {renderSphere(marsRef, textures.mars, [1, 1, 2])}
+      {navButton === "About" && (
+        <group>
+          {renderSphere("earth", textures.earth)}
+          {renderSphere("mars", textures.mars)}
+          {renderHtmlBox([-4.2, -2.4, -5], "Work", "⚡ using Next JS", "💡 for Modern Apps")}
+          {renderHtmlBox([3.5, -2.4, -5], "GG", "⚡ using Angular", "💡 and Stomp JS")}
+        </group>
+      )}
 
-        {/* 🎉 Render Text AFTER Spheres are Loaded */}
-        {spheresRendered && (
-          <>
-            <Html position={[3.5, -2.4, -5]} rotation={[0, 0, 0]} transform > 
-            <div
-              style={{
-                width: "10vw",
-                maxWidth: "200px",
-                textAlign: "center",
-                padding: "1vw",
-                backgroundColor: "rgba(15, 15, 16, 0.6)",
-                border: "solid",
-                borderRadius: "10px",
-                borderColor: "rgba(165, 159, 141, 0.6)"
-              }}
-            >
-              <span
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "0.9vw", // Responsive font size
-                  //lineHeight: "1.5",
-                }}
-              >
-                🚀 Chat Application
-              </span>
-              <span
-                style={{
-                  fontSize: "0.9vw", // Changed 28px to 0.9vw
-                 // lineHeight: "1.5",
-                }}
-              >
-                ⚡ using Angular
-              </span>
-              <span
-                style={{
-                  fontSize: "0.9vw", // Changed 28px to 0.9vw
-                 // lineHeight: "1.5",
-                }}
-              >
-                💡 and Stomp JS
-              </span>
-            </div>
-          </Html>
-          </>
-        )}
-      </group>
+      {/* 🌍 About Group */}
+      {navButton === "Contact" && (
+        <group>
+          {renderSphere("earth", textures.earth)}
+          {renderSphere("mars", textures.mars)}
+          {renderHtmlBox([-4.2, -2.4, -5], "Contact", "⚡ using Next JS", "💡 for Modern Apps")}
+          {renderHtmlBox([3.5, -2.4, -5], "Linkedin", "⚡ using Angular", "💡 and Stomp JS")}
+        </group>
+      )}
     </>
   );
 }

@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { SpotLightHelper } from "three";
 import * as THREE from "three";
 
 export default function SaintAnimationModel({
@@ -10,109 +9,99 @@ export default function SaintAnimationModel({
 }) {
   const { scene, animations } = saintModel;
   const [spotLightPower, setSpotLightPower] = useState(10);
-  const lightRef = useRef(); // Light ref
-  const modelRef = useRef(); // Model ref
+  const lightRef = useRef();
+  const modelRef = useRef();
   const mixerRef = useRef(null);
   const actionRef = useRef(null);
 
-  // 🎥 Memoize animations and setup once
-  const setupAnimations = useMemo(() => {
-    if (animations.length > 0) {
-      const mixer = new THREE.AnimationMixer(scene);
-      const action = mixer.clipAction(animations[0]);
-      const waitAction = mixer.clipAction(animations[2]);
+  // 🎥 Memoize animations setup
+  const { mixer, action, waitAction } = useMemo(() => {
+    if (!animations?.length) return {};
+    
+    const mixer = new THREE.AnimationMixer(scene);
+    const action = mixer.clipAction(animations[0]);
+    const waitAction = mixer.clipAction(animations[2]);
 
-      // Configure action to play once and stop
-      action.clampWhenFinished = true;
-      action.setLoop(THREE.LoopOnce, 1);
+    action.clampWhenFinished = true;
+    action.setLoop(THREE.LoopOnce, 1);
 
-      return { mixer, action, waitAction };
-    }
-    return {};
+    return { mixer, action, waitAction };
   }, [animations, scene]);
 
-  // 🧠 Attach animations once after load
+  // 🧠 Initialize animations
   useEffect(() => {
-    if (setupAnimations.mixer && setupAnimations.action) {
-      mixerRef.current = setupAnimations.mixer;
-      actionRef.current = setupAnimations.action;
+    if (!mixer || !action) return;
 
-      // Detect when animation finishes
-      mixerRef.current.addEventListener("finished", () => {
-        console.log("Animation Completed!");
-        if (onAnimationComplete) {
-          onAnimationComplete();
-          setSpotLightPower(100);
-        }
-      });
-    }
-  }, [setupAnimations, onAnimationComplete]);
+    mixerRef.current = mixer;
+    actionRef.current = action;
 
-  // 🎮 Play/Stop animation based on `playAnimation`
+    const handleFinish = () => {
+      console.log("Animation Completed!");
+      onAnimationComplete?.();
+      setSpotLightPower(100);
+    };
+
+    mixer.addEventListener("finished", handleFinish);
+    return () => mixer.removeEventListener("finished", handleFinish);
+  }, [mixer, action, onAnimationComplete]);
+
+  // 🎮 Control animation playback
   useEffect(() => {
-    if (mixerRef.current && actionRef.current) {
-      if (playAnimation) {
-        console.log("Playing Animation...");
-        setupAnimations.waitAction?.stop(); // Stop waiting action
-        actionRef.current.reset().play(); // Play the animation
-        setSpotLightPower(1000);
-      } else {
-        console.log("Stopping Animation...");
-        actionRef.current.stop();
-        setupAnimations.waitAction?.reset().play(); // Play waiting animation
-        setSpotLightPower(100);
-      }
-    }
-  }, [playAnimation, setupAnimations]);
+    if (!mixer || !action) return;
 
-  // 🕹️ Update animation on each frame
+    if (playAnimation) {
+      console.log("Playing Animation...");
+      waitAction?.stop();
+      action.reset().play();
+      setSpotLightPower(1000);
+    } else {
+      console.log("Stopping Animation...");
+      action.stop();
+      waitAction?.reset().play();
+      setSpotLightPower(100);
+    }
+  }, [playAnimation, mixer, action, waitAction]);
+
+  // 🕹️ Frame update
   useFrame((_, delta) => {
     mixerRef.current?.update(delta);
-
-    // Optimize target update only when model exists
     if (lightRef.current && modelRef.current) {
       lightRef.current.target.position.copy(modelRef.current.position);
       lightRef.current.target.updateMatrixWorld();
     }
-  });
+  }, -1); // Lower priority for useFrame
 
-  // 🌟 Enable shadows for meshes only once after model loads
+  // 🌟 Configure shadows once
   useEffect(() => {
     scene.traverse((child) => {
       if (child.isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
+        child.castShadow = child.receiveShadow = true;
       }
     });
   }, [scene]);
 
   return (
     <>
-      {/* 🧩 GLTF Model */}
       <primitive
         ref={modelRef}
         object={scene}
         scale={1}
         rotation={[0, -0.5, 0]}
         position={[4, -0.5, 0.5]}
-        
       />
-
-      {/* 🔥 Optimized SpotLight */}
       <spotLight
         ref={lightRef}
         position={[2, 3, 3]}
         angle={0.3}
-        penumbra={1.0}
+        penumbra={1}
         intensity={9.5}
         castShadow
-        color={"#ff5555"}
+        color="#ff5555"
         power={spotLightPower}
-        shadow-mapSize-width={512} // Reduce shadow map size
-        shadow-mapSize-height={512} // Lowering resolution for optimization
+        shadow-mapSize={[512, 512]} // Array instead of separate props
         shadow-camera-near={0.5}
         shadow-camera-far={10}
-        shadow-bias={-0.0005} // Fine-tune shadow quality
+        shadow-bias={-0.0005}
       />
     </>
   );
