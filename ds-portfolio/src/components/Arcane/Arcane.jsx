@@ -84,7 +84,7 @@ export default function Arcane({ navButton, textures }) {
         </group>
       )}
 
-      {/* 🌍 About Group */}
+      {/* 🌍 About Group 
       {navButton === "About" && (
         <group>
           {renderSphere("earth", textures.earth)}
@@ -92,9 +92,9 @@ export default function Arcane({ navButton, textures }) {
           {renderHtmlBox([-4.2, -2.4, -5], "Work", "⚡ using Next JS", "💡 for Modern Apps")}
           {renderHtmlBox([3.5, -2.4, -5], "GG", "⚡ using Angular", "💡 and Stomp JS")}
         </group>
-      )}
+      )}*/}
 
-      {/* 🌍 About Group */}
+      {/* 🌍 Contact Group 
       {navButton === "Contact" && (
         <group>
           {renderSphere("earth", textures.earth)}
@@ -102,7 +102,7 @@ export default function Arcane({ navButton, textures }) {
           {renderHtmlBox([-4.2, -2.4, -5], "Contact", "⚡ using Next JS", "💡 for Modern Apps")}
           {renderHtmlBox([3.5, -2.4, -5], "Linkedin", "⚡ using Angular", "💡 and Stomp JS")}
         </group>
-      )}
+      )}*/}
     </>
   );
 }

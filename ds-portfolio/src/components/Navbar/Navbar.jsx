@@ -7,6 +7,8 @@ import Arcane from "../Arcane/Arcane.jsx";
 import "./Navbar.css";
 import ErrorBoundary from "../Error Boundary/ErrorBoundary.jsx";
 import Home from "../Home/Home.jsx";
+import About from "../About/About.jsx";
+import ContactRunes from "../Contact/Contact.jsx";
 
 const Navbar = ({ textures, saintModel, elderGodsBB }) => {
   const { camera, viewport } = useThree();
@@ -38,9 +40,7 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
 
     setTimeout(() => {
       setShowMeteorite(true);
-      setDisable 
-   
-Button(false);
+      setDisableButton(false);
     }, 100);
   };
 
@@ -97,6 +97,18 @@ Button(false);
           <Home visible={navButton === "Home"} />
         </Suspense>
       </ErrorBoundary>
+
+      <ErrorBoundary name="About">
+        <Suspense fallback={null}>
+          <About visible={navButton === "About"} />
+        </Suspense>
+      </ErrorBoundary>  
+
+      <ErrorBoundary name="Contact Runes">
+        <Suspense fallback={null}>
+          <ContactRunes visible={navButton === "Contact"} />
+        </Suspense>
+      </ErrorBoundary>    
 
       <ErrorBoundary name="Saint animation">
         <SaintAnimationModel

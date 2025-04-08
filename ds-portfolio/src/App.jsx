@@ -1,5 +1,5 @@
 import { Canvas, extend } from "@react-three/fiber";
-import { OrbitControls, Html } from "@react-three/drei";
+import { OrbitControls, Html, Preload } from "@react-three/drei";
 import Navbar from "./components/Navbar/Navbar.jsx";
 import Scene from "./components/Scene/Scene.jsx";
 import Starfield from "./components/Starfield/Starfield.jsx";
@@ -89,6 +89,7 @@ export default function App() {
             </Physics>
           </>
         )}
+      <Preload all />  
       </Canvas>
     </>
   );

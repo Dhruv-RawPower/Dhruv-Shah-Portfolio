@@ -7,7 +7,7 @@ const Home = ( {visible} ) => {
 
   const [typedText, setTypedText] = useState("");
   const fullText = "Software Developer | 3D Enthusiast | Innovator";
-  const typingSpeed = 100; // Typing speed in ms
+  const typingSpeed = 120; // Typing speed in ms
 
   useEffect(() => {
     let index = 0;
