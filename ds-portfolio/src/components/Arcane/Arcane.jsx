@@ -46,10 +46,16 @@ export default function Arcane({ navButton, textures }) {
     }
   });
 
-  // ✨ Memoized Sphere Rendering (Prevents Re-renders)
+  // ✨ Memoized Sphere Rendering (with hover cursor)
   const renderSphere = useMemo(
     () => (name, texture, onClick) => (
-      <mesh ref={sphereRefs[name]} position={endPositions[name]} onClick={onClick}>
+      <mesh
+        ref={sphereRefs[name]}
+        position={endPositions[name]}
+        onClick={onClick}
+        onPointerOver={() => (document.body.style.cursor = "pointer")}
+        onPointerOut={() => (document.body.style.cursor = "default")}
+      >
         <sphereGeometry args={[0.6, 16, 16]} />
         <meshStandardMaterial map={texture} />
       </mesh>
@@ -77,32 +83,12 @@ export default function Arcane({ navButton, textures }) {
       {/* 🚀 Projects Group */}
       {navButton === "Projects" && (
         <group>
-          {renderSphere("mercury", textures.mercury, () => window.open("https://www.youtube.com/", "_blank"))}
-          {renderSphere("venus", textures.venus, () => window.open("https://www.linkedin.com/in/dhruvshah09/", "_blank"))}
-          {renderHtmlBox([-4.2, -2.4, -5], "🚀 SAAS Platform", "⚡ using Next JS", "💡 for Modern Apps")}
-          {renderHtmlBox([3.5, -2.4, -5], "🚀 Chat Application", "⚡ using Angular", "💡 and Stomp JS")}
+          {renderSphere("venus", textures.venus, () => window.open("https://e-commerce-store-with-3-d-product-preview-2.vercel.app/", "_blank"))}
+          {renderSphere("earth", textures.earth, () => window.open("https://github.com/Dhruv-RawPower/AI-Powered-Blog-Website", "_blank"))}
+          {renderHtmlBox([-4.2, -2.4, -5], "🚀 3D E-Commerce Store", "⚡ using Next JS, React Three Fiber,", "Prisma and Paypal.")}
+          {renderHtmlBox([3.5, -2.4, -5], "🚀 AI Powered", "⚡ blog website", "💡 and Stomp JS")}
         </group>
       )}
-
-      {/* 🌍 About Group 
-      {navButton === "About" && (
-        <group>
-          {renderSphere("earth", textures.earth)}
-          {renderSphere("mars", textures.mars)}
-          {renderHtmlBox([-4.2, -2.4, -5], "Work", "⚡ using Next JS", "💡 for Modern Apps")}
-          {renderHtmlBox([3.5, -2.4, -5], "GG", "⚡ using Angular", "💡 and Stomp JS")}
-        </group>
-      )}*/}
-
-      {/* 🌍 Contact Group 
-      {navButton === "Contact" && (
-        <group>
-          {renderSphere("earth", textures.earth)}
-          {renderSphere("mars", textures.mars)}
-          {renderHtmlBox([-4.2, -2.4, -5], "Contact", "⚡ using Next JS", "💡 for Modern Apps")}
-          {renderHtmlBox([3.5, -2.4, -5], "Linkedin", "⚡ using Angular", "💡 and Stomp JS")}
-        </group>
-      )}*/}
     </>
   );
 }
