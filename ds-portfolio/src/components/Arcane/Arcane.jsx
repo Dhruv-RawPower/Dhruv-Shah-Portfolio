@@ -48,20 +48,37 @@ export default function Arcane({ navButton, textures }) {
 
   // ✨ Memoized Sphere Rendering (with hover cursor)
   const renderSphere = useMemo(
-    () => (name, texture, onClick) => (
-      <mesh
-        ref={sphereRefs[name]}
-        position={endPositions[name]}
-        onClick={onClick}
-        onPointerOver={() => (document.body.style.cursor = "pointer")}
-        onPointerOut={() => (document.body.style.cursor = "default")}
-      >
-        <sphereGeometry args={[0.6, 16, 16]} />
-        <meshStandardMaterial map={texture} />
+  () => (name, texture, onClick) => (
+    <group
+      /* group so we can hover the whole thing */
+      ref={sphereRefs[name]}
+      position={endPositions[name]}
+      onClick={onClick}
+      onPointerOver={() => (document.body.style.cursor = "pointer")}
+      onPointerOut={() => (document.body.style.cursor = "default")}
+    >
+      {/* 🌍 base sphere – keeps its texture */}
+      <mesh>
+        <sphereGeometry args={[0.6, 32, 32]} />
+        <meshStandardMaterial map={texture} roughness={0.8} metalness={0.1} />
       </mesh>
-    ),
-    [textures]
-  );
+
+      {/* ✨ glow shell – slightly larger, additive & semi-transparent */}
+      <mesh>
+        <sphereGeometry args={[0.602, 32, 32]} />      {/* radius a bit bigger */}
+        <meshBasicMaterial
+          color="white"                             /* glow colour */
+          transparent
+          opacity={0.45}                              /* halo strength */
+          blending={THREE.AdditiveBlending}
+          side={THREE.BackSide}                       /* flip normals */
+          depthWrite={false}                          /* stops z-fighting flicker */
+        />
+      </mesh>
+    </group>
+  ),
+  [textures]
+);
 
   // 📌 Memoized HTML Info Box
   const renderHtmlBox = useMemo(
