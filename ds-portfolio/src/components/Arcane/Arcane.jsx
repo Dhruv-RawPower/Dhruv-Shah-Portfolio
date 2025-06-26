@@ -86,7 +86,7 @@ export default function Arcane({ navButton, textures }) {
           {renderSphere("venus", textures.venus, () => window.open("https://github.com/Dhruv-RawPower/AI-Powered-Blog-Website", "_blank"))}
           {renderSphere("earth", textures.earth, () => window.open("https://e-commerce-store-with-3-d-product-preview-2.vercel.app/", "_blank"))}
           {renderHtmlBox([-4.2, -2.4, -5], "🚀 3D E-Commerce Store", "⚡ using Next JS, React Three Fiber,", "Prisma and Paypal.")}
-          {renderHtmlBox([3.5, -2.4, -5], "🚀 AI Powered", "⚡ blog website", "💡 and Stomp JS")}
+          {renderHtmlBox([3.5, -2.4, -5], "🚀 AI Powered web", "⚡ blog website", "💡 and Stomp JS")}
         </group>
       )}
     </>
