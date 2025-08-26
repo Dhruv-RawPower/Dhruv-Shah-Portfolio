@@ -1,4 +1,4 @@
-import { Canvas, extend } from "@react-three/fiber";
+import { Canvas, extend, useThree } from "@react-three/fiber";
 import { OrbitControls, Html, Preload } from "@react-three/drei";
 import Navbar from "./components/Navbar/Navbar.jsx";
 import Scene from "./components/Scene/Scene.jsx";
@@ -9,7 +9,8 @@ import "./App.css";
 import { Physics } from "@react-three/rapier";
 import { Perf } from "r3f-perf";
 import { useState, useEffect } from "react";
-import ErrorBoundary from "./components/Error Boundary/ErrorBoundary.jsx";
+import ErrorBoundary from "./components/Error Boundary/ErrorBoundary.jsx"
+
 
 extend({ AxesHelper: THREE.AxesHelper });
 
