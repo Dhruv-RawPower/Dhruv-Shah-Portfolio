@@ -35,6 +35,15 @@ export default function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  function ResponsiveCamera() {
+    const { camera, size } = useThree();
+    useEffect(() => {
+      camera.aspect = size.width / size.height;
+      camera.updateProjectionMatrix();
+    }, [camera, size]);
+    return null;
+  }
+
   return (
     <>
       {/* Show Overlay if Device is in Portrait Mode */}
@@ -55,6 +64,7 @@ export default function App() {
         camera={{ position: [0, 1, 5], rotation: [0, 0, 0] }}
       >
         {/* <OrbitControls /> */}
+        <ResponsiveCamera />
         {/* 🌌 Preload assets and pass data */}
         <ErrorBoundary name="Preloader">
           <Preloader setAssets={setAssets} />

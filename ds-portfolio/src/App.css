@@ -15,7 +15,7 @@ canvas {
   left: 0;
   width: 100vw;
   height: 100vh;
-  pointer-events: none;
+  /*pointer-events: none;*/
 }
 
 /* Apply globally for HTML text if needed */
@@ -40,6 +40,12 @@ body {
   font-weight: bold;
   z-index: 9999;
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .rotate-warning {
+    font-size: 16px;
+  }
 }
 
 @font-face {
