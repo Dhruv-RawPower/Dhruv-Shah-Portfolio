@@ -1,22 +1,24 @@
 .navClass {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   gap: 12px;
   justify-content: center;
-  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
   max-width: 320px;
   margin: 0 auto;
 }
+
 
 /* Dungeon Style Button */
 .dungeon-btn {
   font-family: "ElderGodsBB", sans-serif;
   background: linear-gradient(145deg, #1e1e1e, #121212);
-  color: #ff4d00;
+  color: #ff5a1f;
   padding: 6px;
   border: 3px solid #7a2e13;
   border-radius: 8px;
-  font-size: 2vw;
+  font-size: clamp(14px, 1.6vw, 20px);
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;

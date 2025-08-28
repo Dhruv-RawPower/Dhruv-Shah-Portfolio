@@ -94,10 +94,9 @@ export default function SaintAnimationModel({
         position={[2, 3, 3]}
         angle={0.3}
         penumbra={1}
-        intensity={9.5}
+        intensity={spotLightPower / 10}
         castShadow
         color="#ff5555"
-        power={spotLightPower}
         shadow-mapSize={[512, 512]} // Array instead of separate props
         shadow-camera-near={0.5}
         shadow-camera-far={10}

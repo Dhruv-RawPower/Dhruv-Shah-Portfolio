@@ -20,7 +20,7 @@ const Navbar = ({ textures, saintModel, elderGodsBB }) => {
   const navbarPositionRef = useRef(new THREE.Vector3());
 
   // 📏 Calculate navbar position once per viewport change
-  useEffect(() => {
+  useFrame(() => {
     const fovScale = Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
     const aspectRatio = viewport.width / viewport.height;
     navbarPositionRef.current.set(
